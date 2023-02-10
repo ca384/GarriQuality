@@ -16,8 +16,16 @@ Umu_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UM
 
 str(Oto_22_func)
 str(Umu_22_func)
+Oto_22_func$Genotype<-as.factor(Oto_22_func$Genotype)
+Oto_22_func$wac.<-as.numeric(Oto_22_func$wac.)
+Umu_22_func$Genotype<-as.factor(Umu_22_func$Genotype)
+head(Umu_22_func)
+head(Oto_22_func)
+str(Oto_22_func)
+str(Umu_22_func)
+```
 
-as.numeric()
-
+```{r creating plots}
+boxplot(Oto_22_func$~garri.38$LOCATION, main="Dry matter content by specific gravity ",ylab = "DMC (%)",xlab="LOCATION")
 ```
 
