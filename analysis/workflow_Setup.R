@@ -1,0 +1,11 @@
+getwd()
+setwd("/Users/ca384/Documents/ChinedoziRepo")
+install.packages("workflowr")
+library(workflowr)
+?workflowr
+wflow_git_config(user.name = "Chinedozi Amaefula", user.email = "ca384@cornell.edu")
+wflow_start("GarriQuality")
+install.packages("usethis")
+library(usethis)
+usethis::use_git()
+getwd()

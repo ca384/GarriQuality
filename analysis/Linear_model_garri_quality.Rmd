@@ -1,0 +1,23 @@
+---
+title: "Garri Functional Quality"
+output: pdf_document
+date: "2023-02-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+Oto_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv") # data for Otobi wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
+
+Umu_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv")# data for Umudike wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
+
+str(Oto_22_func)
+str(Umu_22_func)
+
+as.numeric()
+
+```
+
