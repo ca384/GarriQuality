@@ -26,6 +26,11 @@ str(Umu_22_func)
 ```
 
 ```{r creating plots}
-boxplot(Oto_22_func$~garri.38$LOCATION, main="Dry matter content by specific gravity ",ylab = "DMC (%)",xlab="LOCATION")
+boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri ",ylab = "WAC",xlab="Genotypes")
+
+##Removing outliers using the boxplot method
+outliers <- boxplot(garri.38$dewatered.mash,plot=FALSE)$out  
+#by setting plot to false the boxplot is hidden
+
 ```
 
