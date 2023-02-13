@@ -23,14 +23,26 @@ head(Umu_22_func)
 head(Oto_22_func)
 str(Oto_22_func)
 str(Umu_22_func)
+summary(Oto_22_func)
+summary(Umu_22_func)
 ```
 
 ```{r creating plots}
 boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri ",ylab = "WAC",xlab="Genotypes")
 
-##Removing outliers using the boxplot method
-outliers <- boxplot(garri.38$dewatered.mash,plot=FALSE)$out  
-#by setting plot to false the boxplot is hidden
+boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri ",ylab="WAC", xlab="Genotypes") #Removing outliers using the boxplot method
+
+install.packages("ggplot2")
+library(ggplot2)
+boxplot(Oto_22_func$swelling.index, main="swelling index, xlab="Genotypes)
+boxplot(Oto_22_func$swelling.power)
+boxplot(Oto_22_func$wac., main="Water absorbing capacity of garri ",ylab="WAC", xlab="Genotypes")
+boxplot(Oto_22_func$Bulk.Density)
+```
+
+
+
+```{r}
 
 ```
 
