@@ -10,9 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-Oto_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv") # data for Otobi wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
+Oto_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv", head=T) # data for Otobi wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
 
-Umu_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv")# data for Umudike wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
+Umu_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv",head=T)# data for Umudike wit swelling power, swelling index, bulk density and water absorbing capacity for 2022
 
 str(Oto_22_func)
 str(Umu_22_func)
@@ -34,15 +34,61 @@ boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri ",ylab="WAC",
 
 install.packages("ggplot2")
 library(ggplot2)
-boxplot(Oto_22_func$swelling.index, main="swelling index, xlab="Genotypes)
-boxplot(Oto_22_func$swelling.power)
-boxplot(Oto_22_func$wac., main="Water absorbing capacity of garri ",ylab="WAC", xlab="Genotypes")
-boxplot(Oto_22_func$Bulk.Density)
+
+par(mfrow=c(2,2))
+boxplot(Oto_22_func$swelling.index, xlab="Genotypes", ylab="SI")
+boxplot(Oto_22_func$swelling.power, ylab="SP",xlab="Genotypes")
+boxplot(Oto_22_func$wac.,ylab="WAC", xlab="Genotypes")
+boxplot(Oto_22_func$Bulk.Density, xlab="Genotypes", ylab="Bulk density")
+
 ```
 
 
 
-```{r}
+```{r renamen a column and adding new colun for otobi and umudike}
+library("dplyr") #Using rename()
+
+colnames(Oto_22_func)
+colnames(Umu_22_func)
+Umu_22_func <- Umu_22_func %>% 
+       rename(Bulk.Density = AverageBD) # rename bulk density
+
+Umu_22_func <- Umu_22_func %>% 
+       rename(WAC= wac.) # rename wac. to WAC
+Umu_22_func <- Umu_22_func %>% 
+       rename(swelling.index= Swelling.index) # rename wac. to WAC
+
+
+
+Oto_22_func <- Oto_22_func %>% 
+       rename(WAC= wac.) # rename wac. to WAC for otobi
+```
+
+```{r remove column sn and add column for year and location}
+install.packages("tidyverse")
+library(tidyverse)
+Umu_22_func <-Umu_22_func %>%
+  add_column(location = "Umudike", year="2022") # add column with location and year for Umudike
+head(Umu_22_func)
+Umu_22_func <- subset(Umu_22_func, select=-c(sn)) # Remove the sn
+head(Umu_22_func)
+Umu_22_func %>% relocate(location, year)
+
+Oto_22_func <-Oto_22_func %>%
+  add_column(location = "Otobi", year="2022")
+Oto_22_func %>% relocate(location, year) # change the position of location and year from last column to the first column
+```
+
+
+```{r joining the two data frame}
+Umu_oto_22 <-rbind(Oto_22_func, y=Umu_22_func)
+View(Umu_oto_22)
+str(Umu_oto_22)
+Umu_oto_22$location<-as.factor(Umu_oto_22$location)
+Umu_oto_22$year<-as.factor(Umu_oto_22$year)
+str(Umu_oto_22)
+summary(Umu_oto_22)
+plot(Umu_oto_22)
 
 ```
 
