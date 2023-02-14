@@ -91,4 +91,30 @@ summary(Umu_oto_22)
 plot(Umu_oto_22)
 
 ```
+```{r linear models}
+install.packages("lme4")
+install.packages("sommer")
+install.packages("devtools")
+install.packages("Hmisc")
+library(lme4)
+library(sommer)
+library(Hmisc)
+Umu_oto_corr<-round(cor(Umu_oto_22$swelling.index,Umu_oto_22$swelling.power,Umu_oto_22$WAC,Umu_oto_22$Bulk.Density, use="complete.obs"),3)
+
+mod_1_WAC_aov <- lm(WAC ~ Genotype + location, Umu_oto_22)
+summary(m2)
+anova(m2)
+
+mod_2_WAC_aov <- lmer(WAC ~ 1|Genotype + location, Umu_oto_22)
+
+cor(WAC, swelling.index, data=Umu_oto_22)
+
+#corrplot(corre.oto, type = "upper", order = "hclust",tl.col = "black" , tl.srt = 90,  cl.pos = "n")
+
+#write.csv(corplot.oto,file=here("correlation.oto_new.csv"))
+
+WAC<-lmer(data=Umu_oto_22, Genotype+location())
+
+
+```
 
