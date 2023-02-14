@@ -9,10 +9,31 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r}
-Oto_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv", head=T) # data for Otobi wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
+```{r Check that I have the packages}
+packages_used <- c("tidyverse", "ggplot2", "here")
+ip <- installed.packages()
+all_packages_installed <- TRUE
+for (package in packages_used){
+  if (!(package %in% ip[,"Package"])){
+    print(paste("Please install package", package))
+    all_packages_installed <- FALSE
+  }
+}#END packages_used
+if (!all_packages_installed) stop("Need to install packages")
+```
 
-Umu_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv",head=T)# data for Umudike wit swelling power, swelling index, bulk density and water absorbing capacity for 2022
+```{r Use here package}
+require(here)
+here::i_am("analysis/Linear_model_garri_quality.Rmd")
+```
+
+```{r Pull in the data}
+library(tidyverse)
+Oto_22_func <- read.csv(here::here("data", "OTOBI_2022PYT_FUNCTIONAL.csv"), head=T)
+
+# Oto_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv", head=T) # data for Otobi wit swelling power, swelling indx, bulk density and water absorbing capacity for 2022
+Umu_22_func <- read.csv(here::here("data/UMU_2022_PYT_FUNCTIONAL.csv"), head=T)
+# Umu_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv",head=T)# data for Umudike wit swelling power, swelling index, bulk density and water absorbing capacity for 2022
 
 str(Oto_22_func)
 str(Umu_22_func)
@@ -28,11 +49,10 @@ summary(Umu_22_func)
 ```
 
 ```{r creating plots}
-boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri ",ylab = "WAC",xlab="Genotypes")
+boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri OTO",ylab = "WAC",xlab="Genotypes")
 
-boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri ",ylab="WAC", xlab="Genotypes") #Removing outliers using the boxplot method
+boxplot(Umu_22_func$wac. , main="Water absorbing capacity of garri UMU",ylab="WAC", xlab="Genotypes") #Removing outliers using the boxplot method
 
-install.packages("ggplot2")
 library(ggplot2)
 
 par(mfrow=c(2,2))
@@ -45,7 +65,7 @@ boxplot(Oto_22_func$Bulk.Density, xlab="Genotypes", ylab="Bulk density")
 
 
 
-```{r renamen a column and adding new colun for otobi and umudike}
+```{r rename a column and adding new colun for otobi and umudike}
 library("dplyr") #Using rename()
 
 colnames(Oto_22_func)
@@ -65,23 +85,22 @@ Oto_22_func <- Oto_22_func %>%
 ```
 
 ```{r remove column sn and add column for year and location}
-install.packages("tidyverse")
 library(tidyverse)
 Umu_22_func <-Umu_22_func %>%
   add_column(location = "Umudike", year="2022") # add column with location and year for Umudike
 head(Umu_22_func)
 Umu_22_func <- subset(Umu_22_func, select=-c(sn)) # Remove the sn
 head(Umu_22_func)
-Umu_22_func %>% relocate(location, year)
+Umu_22_func <- Umu_22_func %>% relocate(location, year)
 
-Oto_22_func <-Oto_22_func %>%
-  add_column(location = "Otobi", year="2022")
-Oto_22_func %>% relocate(location, year) # change the position of location and year from last column to the first column
+Oto_22_func <- Oto_22_func %>%
+  add_column(location = "Otobi", year="2022") %>% relocate(location, year)
+# change the position of location and year from last column to the first column
 ```
 
 
 ```{r joining the two data frame}
-Umu_oto_22 <-rbind(Oto_22_func, y=Umu_22_func)
+Umu_oto_22 <- rbind(Oto_22_func, y=Umu_22_func)
 View(Umu_oto_22)
 str(Umu_oto_22)
 Umu_oto_22$location<-as.factor(Umu_oto_22$location)
@@ -89,7 +108,6 @@ Umu_oto_22$year<-as.factor(Umu_oto_22$year)
 str(Umu_oto_22)
 summary(Umu_oto_22)
 plot(Umu_oto_22)
-
 ```
 ```{r linear models}
 install.packages("lme4")
