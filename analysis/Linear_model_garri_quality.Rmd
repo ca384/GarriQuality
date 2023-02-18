@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r Check that I have the packages}
-packages_used <- c("tidyverse", "ggplot2", "here")
+packages_used <- c("tidyverse", "ggplot2", "here", "stringr" )
 ip <- installed.packages()
 all_packages_installed <- TRUE
 for (package in packages_used){
@@ -101,38 +101,98 @@ Oto_22_func <- Oto_22_func %>%
 
 ```{r joining the two data frame}
 Umu_oto_22 <- rbind(Oto_22_func, y=Umu_22_func)
-View(Umu_oto_22)
+
 str(Umu_oto_22)
-Umu_oto_22$location<-as.factor(Umu_oto_22$location)
-Umu_oto_22$year<-as.factor(Umu_oto_22$year)
+Umu_oto_22$location <- as.factor(Umu_oto_22$location)
+Umu_oto_22$year <- as.factor(Umu_oto_22$year)
 str(Umu_oto_22)
+glimpse(Umu_oto_22)
 summary(Umu_oto_22)
 plot(Umu_oto_22)
+colnames(Umu_oto_22)
 ```
-```{r linear models}
-install.packages("lme4")
-install.packages("sommer")
-install.packages("devtools")
-install.packages("Hmisc")
-library(lme4)
-library(sommer)
-library(Hmisc)
-Umu_oto_corr<-round(cor(Umu_oto_22$swelling.index,Umu_oto_22$swelling.power,Umu_oto_22$WAC,Umu_oto_22$Bulk.Density, use="complete.obs"),3)
 
-mod_1_WAC_aov <- lm(WAC ~ Genotype + location, Umu_oto_22)
-summary(m2)
-anova(m2)
+```{r importing 2019 functional properties data and renaming column}
+Oto_19 <- read.csv(here::here("data", "functional-otobi2019_2020.csv"), head=T)
 
-mod_2_WAC_aov <- lmer(WAC ~ 1|Genotype + location, Umu_oto_22)
+Umu_19 <- read.csv(here::here("data", "Umu_func_pyt2019_2020.csv"), head=T)
 
-cor(WAC, swelling.index, data=Umu_oto_22)
+str(Oto_19)
+str(Umu_19)
 
-#corrplot(corre.oto, type = "upper", order = "hclust",tl.col = "black" , tl.srt = 90,  cl.pos = "n")
+colnames(Oto_19)
+colnames(Umu_19)
 
-#write.csv(corplot.oto,file=here("correlation.oto_new.csv"))
+Oto_19 <- Oto_19 %>% 
+       rename(Genotype= sample_id)
 
-WAC<-lmer(data=Umu_oto_22, Genotype+location())
+Umu_19 <- Umu_19 %>% 
+       rename(Genotype= Genotypes)
+
+Umu_19 <- Umu_19 %>% 
+       rename(Moisture = X.moisture)
+
+Umu_19 <- Umu_19 %>% 
+       rename(Dry.Matter =X..Dry.Matter)
+
+Oto_19 <- Oto_19 %>% 
+       rename(swelling.index=Swelling.Index..final.initial.)
+
+Oto_19 <- Oto_19 %>% 
+       rename(swelling.power= SP)
+
+Oto_19 <- Oto_19 %>% 
+       rename(Bulk.Density= Bulk.Density..g.ml.)
+
+colnames(Oto_19)
+colnames(Umu_19)
+dim(Oto_19)
+dim(Umu_19)
+str(Oto_19)
 
 
 ```
+
+```{r select the need column from Oto_19 and Umu_19, Add year 2019, change the stucture of the data}
+
+ #selecting  column
+
+Oto_Selected <- Oto_19 %>% dplyr::select("location", "Genotype" ,"swelling.index", "swelling.power", "WAC"          , "Bulk.Density" )
+
+
+#taking the average of the genotypes duplicates for otobi
+Oto_Selected_aggre <- Oto_Selected %>% group_by(Genotype) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+str(Oto_Selected_aggre)
+
+
+Oto_Selected_aggre$Genotype <- as.factor(Oto_Selected_aggre$Genotype)
+
+#Add columns for years and location
+Oto_Selected_aggre  <-  Oto_Selected_aggre  %>%
+  add_column(location = "Otobi",year = "2019")
+ 
+
+
+Umu_Selected <- Umu_19 %>% dplyr:: select('Genotype', 'swelling.index', 'swelling.power', 'WAC', 'Bulk.Density') # select the needed columns
+ 
+Umu_Selected  <-  Umu_Selected  %>%
+  add_column(location = "Umudike",year = "2019") # add location and year to the data frame
+
+
+#add otobi and umudike 2019 data 
+Umu_oto_19 <- rbind(Oto_Selected_aggre,Umu_Selected)
+str(Umu_oto_19)
+Umu_oto_19$location <-  as.factor(Umu_oto_19$location)
+Umu_oto_19$year <-  as.factor(Umu_oto_19$year)
+```
+
+```{r read in the vcf and the dosage file}
+
+snps_dosage<- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
+
+
+```
+
 
