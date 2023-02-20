@@ -188,9 +188,29 @@ Umu_oto_19$location <-  as.factor(Umu_oto_19$location)
 Umu_oto_19$year <-  as.factor(Umu_oto_19$year)
 ```
 
-```{r read in the vcf and the dosage file}
+```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
 
-snps_dosage<- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
+snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
+
+genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
+
+write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
+
+geno_snps <- read.csv(here::here("data/genotype_snps.csv"), head=T)  # had genotype names in old order eg (NR17F10C2aP011)
+
+
+snps_dosage_N <- sub('IITA.TMS.','IITA-TMS-',geno_snps$X) # To ma sure all the genotypes names are correct . Rewrite the checks
+
+ # combine snps_dosage_N with the dosage file
+
+geno_name <- data.frame(snps_dosage_N) # with genotype name in correct order
+
+new_snp <- cbind(snps_dosage_N,snps_dosage) # Combine the new and old order genotype names in one data frame.
+
+new_snp_names <- (new_snp[-2]) #Deselect the column with the old names
+
+new_snp_names <- new_snp_names %>% 
+       rename("X" = "snps_dosage_N") #change the column name of the genotypes back to X
 
 
 ```
