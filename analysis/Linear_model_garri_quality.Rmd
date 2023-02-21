@@ -91,7 +91,7 @@ Umu_22_func <-Umu_22_func %>%
 head(Umu_22_func)
 Umu_22_func <- subset(Umu_22_func, select=-c(sn)) # Remove the sn
 head(Umu_22_func)
-Umu_22_func <- Umu_22_func %>% relocate(location, year)
+Umu_22_func <- Umu_22_func %>% relocate(location, year) # change the position of the location and year
 
 Oto_22_func <- Oto_22_func %>%
   add_column(location = "Otobi", year="2022") %>% relocate(location, year)
@@ -171,14 +171,14 @@ Oto_Selected_aggre$Genotype <- as.factor(Oto_Selected_aggre$Genotype)
 
 #Add columns for years and location
 Oto_Selected_aggre  <-  Oto_Selected_aggre  %>%
-  add_column(location = "Otobi",year = "2019")
+  add_column(location = "Otobi",year = "2020") # change the year from 2019 to 2020
  
 
 
 Umu_Selected <- Umu_19 %>% dplyr:: select('Genotype', 'swelling.index', 'swelling.power', 'WAC', 'Bulk.Density') # select the needed columns
  
 Umu_Selected  <-  Umu_Selected  %>%
-  add_column(location = "Umudike",year = "2019") # add location and year to the data frame
+  add_column(location = "Umudike",year = "2020") # add location and year to the data frame
 
 
 #add otobi and umudike 2019 data 
@@ -186,6 +186,8 @@ Umu_oto_19 <- rbind(Oto_Selected_aggre,Umu_Selected)
 str(Umu_oto_19)
 Umu_oto_19$location <-  as.factor(Umu_oto_19$location)
 Umu_oto_19$year <-  as.factor(Umu_oto_19$year)
+Umu_oto_19 <- data.frame(Umu_oto_19 )
+Umu_oto_19 <-  Umu_oto_19  %>% relocate(location, year) # change the positions of year and location
 ```
 
 ```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
@@ -212,6 +214,43 @@ new_snp_names <- (new_snp[-2]) #Deselect the column with the old names
 new_snp_names <- new_snp_names %>% 
        rename("X" = "snps_dosage_N") #change the column name of the genotypes back to X
 
+```
+
+```{r read in 2020_2021 data for Otobi and Umudike}
+Umu_21 <- read.csv(here::here("data", "Umu_2020_2021_PYT_Functional.csv"), head=T) # input genotypes planted in 2020 and harvested in 2021
+
+Oto_21 <- read.csv(here::here("data", "OTOBI_2020_2021_PYT_Functional.csv"), head=T)
+
+str(Umu_21)
+dim(Umu_21)
+Umu_21$Genotypes <- as.factor(Umu_21$Genotypes)
+Umu_21 <- Umu_21 %>% 
+       rename(Genotype= Genotypes) # rename Genotypes to genotype
+Umu_21 <- Umu_21 %>% 
+       rename(swelling.index= Swelling.index)
+
+Umu_21$WAC <- as.numeric(Umu_21$WAC)
+str(Oto_21)
+Oto_21$Genotype <- as.factor(Oto_21$Genotype)
+dim(Oto_21)
+```
+
+```{r combining 2021 Umudike and otobi in one data frame and adding year and location}
+
+Umu_21  <-  Umu_21  %>%
+  add_column(location = "Umudike",year = "2021") # add year and location to Umu_21
+Oto_21  <-  Oto_21  %>%
+  add_column(location = "Otobi",year = "2021") # add year and location to oto_21
+
+ Umu_oto_21 <- rbind(Oto_21, Umu_21)# combining the two data frame
+
+ Umu_oto_21 <-  Umu_oto_21 %>% relocate(location, year) # change the position of year and location
+ 
+```
+
+```{r combining all three years}
+pyt_functional <- rbind(Umu_oto_19, Umu_oto_21, Umu_oto_22) # combine all three years
+dim(pyt_functional)
 
 ```
 
