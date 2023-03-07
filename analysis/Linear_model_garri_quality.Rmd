@@ -91,15 +91,15 @@ Umu_22_func <-Umu_22_func %>%
 head(Umu_22_func)
 Umu_22_func <- subset(Umu_22_func, select=-c(sn)) # Remove the sn
 head(Umu_22_func)
-Umu_22_func <- Umu_22_func %>% relocate(location, year) # change the poSItion of the location and year
+Umu_22_func <- Umu_22_func %>% relocate(location, year) # change the position of the location and year
 
 Oto_22_func <- Oto_22_func %>%
   add_column(location = "Otobi", year="2022") %>% relocate(location, year)
-# change the poSItion of location and year from last column to the first column
+# change the position of location and year from last column to the first column
 ```
 
 
-```{r joining the two data frame}
+```{r joining the two data frames}
 Umu_oto_22 <- rbind(Oto_22_func, y=Umu_22_func)
 
 str(Umu_oto_22)
@@ -112,6 +112,7 @@ plot(Umu_oto_22)
 colnames(Umu_oto_22)
 ```
 
+# change Oto and Umu_19 to Umu_20
 ```{r importing 2019 functional properties data and renaming column}
 Oto_19 <- read.csv(here::here("data", "functional-otobi2019_2020.csv"), head=T)
 
@@ -154,6 +155,7 @@ dim(Umu_19)
 
 ```
 
+# Rename Oto_Selected_aggre
 ```{r select the need column from Oto_19 and Umu_19, Add year 2019, change the stucture of the data}
 
  #selecting  column
@@ -282,7 +284,7 @@ levels(pyt_functional_1$Genotype)[levels(pyt_functional_1$Genotype) =="IITA-TMS-
 pyt_functional_1$Genotype = gsub(pattern = " ", replacement = "", x = pyt_functional_1$Genotype) # remove space from the genotype name 
 
 
-
+library(metan)
 pyt_functional_1 <-  as.data.frame(pyt_functional_1)
 pyt_functional_1 <- as_factor(.data = pyt_functional_1, 
                 c("environment","location","year","Genotype"))
@@ -316,7 +318,7 @@ ggplot(data = pyt_functional_1,aes(x=year,y= Bulk.Density,fill=location))+
 ```
 
 
-```{r removing outliers for swelling index}
+```{r removing outliers for swelling index using the quatile and interquatile ranges}
 quartiles_SI <- quantile(pyt_functional_1$swelling.index, probs=c(.25, .75), na.rm = TRUE) # qualtile for swelling index
 IQR_SI <- IQR(pyt_functional_1$swelling.index, na.rm = TRUE) # interquatile range  
  
@@ -373,58 +375,106 @@ summary(Umu20)
 summary(Umu21)
 summary(Umu22)
 
+hist(Umu20$Bulk.Density)
+hist(Umu21$Bulk.Density)
+hist(Umu22$Bulk.Density)
+hist(Umu20$Bulk.Density)
 ```
 
 
 ```{r run linear models for wac}
-dat1 <- droplevels(pyt_functional_1[!is.na(pyt_functional_1$WAC),])
-dim(pyt_functional_1)
-dim(dat1)
-
-lm <- lm(formula = WAC ~ Genotype + year + location + year:location + Genotype:location, data = dat1)
-
-lm2 <- lm(formula = WAC ~ Genotype + year + location + year:location + Genotype:location + Genotype:year,
-     data = dat1)
-# the data i removed outliers
-data_no_outlier_WAC <- data.frame(data_no_outlier_WAC)
-
-anova(lm)
-anova(lm2)
-
-
-anova(lm)
-
-## variance componenet
+#dat1 <- droplevels(pyt_functional_1[!is.na(pyt_functional_1$WAC),])
 library(lme4)
-lmr_wac <- lmer(formula = WAC ~ (1|Genotype) + (1|year) +  (1|year:location) + (1|Genotype:year), data = dat1)
-summary(lmr_wac)
-plot(lmr_wac)
-# to calculate heritability
-ss <- summary(lmr_wac) 
+dim(pyt_functional_1)
+
+```
+
+```{r making a function to run the mixed model for all the traits without removing outliers}
+traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density")) # matrix of column names
+
+Result.h2org<- matrix(nrow = 1, ncol = length(traitname))
+colnames(Result.h2org) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
+rownames(Result.h2org) <- "H2Comb" # heritability for the combine analysis
+Result.vcomporg = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
+colnames(Result.vcomporg) <- c("vg", "vgl","vgy","ev", "vph") # column names for the variance components
+rownames(Result.vcomporg) <- traitname # row names of the variance components
+for(trait in traitname){
+tr = paste0(trait) # the loop will be able to select  and analyse each trait
+Na_g = which(is.na(pyt_functional_1[,tr]))# identify traits with 
+if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
+DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_functional_1 data frame
+}else{
+DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
+}
+ eval(parse(text=paste("model=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = pyt_functional_1)"))) # run the model
+ 
+ss <- summary(model)
 sv <- as.data.frame(ss$varcor) # get the variance component
 gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
-#gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
-gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance 
-ev <- sv[sv$grp == "Residual" , "vcov"] # reSIdual variance
-vph <- gv + gy/3 + ev/3 # variance due to phenotype
-Hb_wac <- gv/vph 
-print(Hb_wac)
-
-
-lmr_wac_a <- lmer(formula = WAC ~ (1|Genotype) + (1|year) + (1|location) + (1|year:location) + (1|Genotype:location) , data = data_no_outlier_WAC)
-summary(lmr_wac_a)
-
-# to calculate heritability
-ss_a <- summary(lmr_wac_a) 
-sv_a <- as.data.frame(ss$varcor) # get the variance component
-gv_a <- sv_a[sv_a$grp=="Genotype", "vcov"] # genetic variance
-#gl_a <- sv_a[sv_a$grp == "Genotype:location" , "vcov"] # genotype by location variance
-gy_a <- sv_a[sv_a$grp == "Genotype:year" , "vcov"] # genotype by year variance 
-ev_a <- sv_a[sv_a$grp == "ReSIdual" , "vcov"] # reSIdual variance
-vph_a <- gv_a  + gy/3 + ev/3 # variance due to phenotype
-Hb_wac_a <- gv_a/vph_a 
-print(Hb_wac_a)
+gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
+gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance
+ev <- sv[sv$grp == "Residual" , "vcov"] # residual variance
+vph <- gv + gl/2 + gy/3 + ev/6 # variance due to phenotype
+# make a matrix of the variance output
+H2 <- gv/vph
+Result.vcomporg[trait,1] = gv
+Result.vcomporg[trait,2] = gl
+Result.vcomporg[trait,3] = gy
+Result.vcomporg[trait,4] = ev
+Result.vcomporg[trait,5] = vph
+Result.h2org[,trait] = H2
+}
+Result.vcomporg
+Result.h2org
 ```
+
+
+```{r  making a function to run the mixed model for all the traits after removing outliers}
+traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density")) # matrix of column names
+Result.h2 = matrix(nrow = 1, ncol = length(traitname)) # this is how we want the result of the heritability to appear after analysis
+colnames(Result.h2) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
+rownames(Result.h2) <- "H2Comb" # heritability for the combine analysis
+Result.vcomp = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
+colnames(Result.vcomp) <- c("vg", "vgl","vgy","ev", "vph") # column names for the variance components
+rownames(Result.vcomp) <- traitname # row names of the variance components
+for(trait in traitname){
+tr = paste0(trait)  # the loop will be able to select  and analyse each trait
+Na_g = which(is.na(pyt_functional_1[,tr]))# identify traits with missing data
+if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
+DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_functional_1 data frame
+}else{
+DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
+}
+eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = DatWithout_na )")))
+RES_trait<- rstudent(model2) # i am using the model that used data without missing data
+outliers<- which(abs(scale(RES_trait))>3) #Remove outlier
+Dat_no_outlier = DatWithout_na[-outliers,] # data frame without outliers
+eval(parse(text=paste("model=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = Dat_no_outlier )"))) # run the model
+ss <- summary(model)
+sv <- as.data.frame(ss$varcor) # get the variance component
+sv
+gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
+gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
+gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance
+ev <- sv[sv$grp == "Residual" , "vcov"] # residual variance
+vph <- gv + gl/2 + gy/3 + ev/6 # variance due to phenotype
+# make a matrix of the variance output
+H2 <- gv/vph
+Result.vcomp[trait,1] = gv
+Result.vcomp[trait,2] = gl
+Result.vcomp[trait,3] = gy
+Result.vcomp[trait,4] = ev
+Result.vcomp[trait,5] = vph
+Result.h2[,trait] = H2
+}
+
+Result.vcomp
+
+Result.h2
+
+
+```
+
 
 
 
@@ -451,6 +501,7 @@ View(geno_absent)
 snp_data <- print(new_snp_names[order(new_snp_names$X), ])
 ```
 
+
 ```{r}
 uniqueName_geno<- unique(new_snp_names)
 dim(uniqueName_geno)
@@ -461,5 +512,8 @@ dim(pyt_functional_1)
 
 pheno_name=data.frame(pyt_functional_1$Genotype)
 pheno_nam_list=as.list(pheno_name)
+
+snp_data$X
+pyt_functional_1$Genotype
 ```
 
