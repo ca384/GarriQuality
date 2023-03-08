@@ -193,32 +193,6 @@ Umu_oto_19 <- data.frame(Umu_oto_19 )
 Umu_oto_19 <-  Umu_oto_19  %>% relocate(location, year) # change the positions of year and location
 ```
 
-```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
-
-snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
-
-genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
-
-write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
-
-geno_snps <- read.csv(here::here("data/genotype_snps.csv"), head=T)  # had genotype names in old order eg (NR17F10C2aP011)
-
-
-#snps_dosage_N <- sub('IITA.TMS.','IITA-TMS-',geno_snps$X) # To ma sure all the genotypes names are correct . Rewrite the checks
-
- # combine snps_dosage_N with the dosage file
-
-geno_name <- data.frame(geno_snps) # with genotype name in correct order
-
-new_snp <- cbind(geno_name,snps_dosage) # Combine the new and old order genotype names in one data frame.
-
-new_snp_names <- (new_snp[-2]) #Deselect the column with the old names
-
-#ew_snp_data <- new_snp_names %>% 
-       #rename("X" = "snps_dosage_N") #change the column name of the genotypes back to X
-
-dim(new_snp_names)
-```
 
 ```{r read in 2020_2021 data for Otobi and Umudike}
 Umu_21 <- read.csv(here::here("data", "Umu_2020_2021_PYT_Functional.csv"), head=T) # input genotypes planted in 2020 and harvested in 2021
@@ -234,7 +208,7 @@ Umu_21 <- Umu_21 %>%
        rename(swelling.index= Swelling.index)
 
 Umu_21$WAC <- as.numeric(Umu_21$WAC)
-str(Oto_21)
+
 Oto_21$Genotype <- as.factor(Oto_21$Genotype)
 dim(Oto_21)
 ```
@@ -264,7 +238,6 @@ pyt_functional = as.data.frame(pyt_functional)
 #rm(pyt_functional_1)
 pyt_functional_1 <- pyt_functional %>%
 unite( 'environment', location:year, sep= "_", remove = FALSE) # concantenating location and environment
-summary(pyt_functional_1$Genotype)
 
 
 #summary(wac_model)$varcomp
@@ -476,44 +449,59 @@ Result.h2
 ```
 
 
+```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
+
+snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
+str(snps_dosage)
+genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
+head(snps_dosage[1:10,1:20])
+
+write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
+
+
+```
+
+```{r import the new data frame}
+snps_geno_name <- read.csv(here::here("data/genotype_snps.csv"), head=T)  # had genotype names in old order eg (NR17F10C2aP011)
+
+dim(snps_geno_name)
+#snps_dosage_N <- sub('IITA.TMS.','IITA-TMS-',geno_snps$X) # To ma sure all the genotypes names are correct . Rewrite the checks
+
+ # combine snps_dosage_N with the dosage file
+
+snps_dosage$X <- snps_geno_name$X # with genotype name in correct order
+colnames(snps_dosage)[1] = "geno_name" # rename column 1 of the snps file
+snps_dosage[1:10, 1:20]
+rownames(snps_dosage) <- snps_dosage$geno_name # Naming the row names
+snps_dosage1 = snps_dosage[,-1] # remove the column 1 of the snps file
+# new_snp <- cbind(geno_name,snps_dosage) # Combine the new and old order genotype names in one data frame.
+
+ # character
+library(sommer)
+library(devtools)
+install.packages("rrBLUP")
+library(rrBLUP)
+snps_dosage1_Amat <- A.mat(snps_dosage1)
+dim(snps_dosage1_Amat)
+heatmap(snps_dosage1_Amat) 
+
+```
+
 
 
 ```{r use the genotypic data to see if the narrow sense heriability will be high ansubsetting the needed genotpic data}
 
-new_geno_dat <- new_snp_names[new_snp_names %in% pyt_functional_1$Genotype]
-
-dim(pyt_functional_1)
-
-dim(new_geno_dat)
-
-View(new_geno_dat)
-
-head(new_geno_dat)
-
-#new_geno_dat <- new_snp_names %>%
-      #filter(X %in% pyt_functional_1$Genotype)
 
 
-geno_absent<-new_snp_names[(!new_snp_names[,1] %in% rownames( pyt_functional_1)),1] #geno  not in row names of 
-View(geno_absent)
 
 
-snp_data <- print(new_snp_names[order(new_snp_names$X), ])
+```
+
+```{r looking for missing genotypes}
+
+#nrow(match(NIGC2a_snps1, geno_list))
 ```
 
 
-```{r}
-uniqueName_geno<- unique(new_snp_names)
-dim(uniqueName_geno)
 
-uni<-unique(pyt_functional_1)
-dim(uni)
-dim(pyt_functional_1)
-
-pheno_name=data.frame(pyt_functional_1$Genotype)
-pheno_nam_list=as.list(pheno_name)
-
-snp_data$X
-pyt_functional_1$Genotype
-```
 
