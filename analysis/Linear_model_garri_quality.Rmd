@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r Check that I have the packages}
-packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan")
+packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP")
 ip <- installed.packages()
 all_packages_installed <- TRUE
 for (package in packages_used){
@@ -222,7 +222,7 @@ Oto_21  <-  Oto_21  %>%
 
  Umu_oto_21 <- rbind(Oto_21, Umu_21)# combining the two data frame
 
- Umu_oto_21 <-  Umu_oto_21 %>% relocate(location, year) # change the poSItion of year and location
+ Umu_oto_21 <-  Umu_oto_21 %>% relocate(location, year) # change the position of year and location
  
 ```
 
@@ -243,7 +243,7 @@ unite( 'environment', location:year, sep= "_", remove = FALSE) # concantenating 
 #summary(wac_model)$varcomp
 # pyt_functional_1$environment = gsub(pattern = " ",replacement = "_", x = pyt_functional_1$environment)
 #pyt_functional_1$environment = as.factor(pyt_functional_1$environment)
-#head(pyt_functional_1)
+
 ```
 
 
@@ -318,7 +318,6 @@ Upper_WAC <- quartiles_WAC[2] + 1.5*IQR_WAC
 data_no_outlier_WAC <- subset(pyt_functional_1, pyt_functional_1$WAC > Lower_WAC & pyt_functional_1$WAC < Upper_WAC)
  
 dim(data_no_outlier_WAC)
-View(data_no_outlier_WAC)
 
 ggplot(data = data_no_outlier_WAC,aes(x=year,y= WAC,fill=location)) +
   geom_boxplot() + facet_grid(.~location)
@@ -360,6 +359,52 @@ hist(Umu20$Bulk.Density)
 library(lme4)
 dim(pyt_functional_1)
 
+```
+
+```{r, trait correlation}
+corr_functional <- cor(pyt_functional_1[,-c(1:4)],  use="complete.obs") # correlation
+
+pairs(corr_functional)
+
+covar_functional  <- cov(pyt_functional_1[,-c(1:4)], use="complete.obs")
+
+write.csv(corr_functional,file=here("./output/correlation_functional_all_year.csv")) 
+```
+
+```{r}
+plot(pyt_functional_1$WAC ~ pyt_functional_1$Bulk.Density)
+
+plot(pyt_functional_1$WAC ~ pyt_functional_1$swelling.power)
+
+plot(pyt_functional_1[,-c(1:4)])
+pairs(covar_functional)
+```
+
+
+
+```{r, plot the entire trials at the same time, for WAC, SP, SI, Bulk Density}
+plot_wac <- pyt_functional_1$environment
+pyt_functional_1 %>% 
+     ggplot(.,aes(x=WAC, fill=environment))+ geom_density(alpha=0.75)
+plot_wac
+
+plot_BD <-pyt_functional_1$environment
+pyt_functional_1 %>% 
+     ggplot(.,aes(x=Bulk.Density, fill=environment))+ geom_density(alpha=0.75)
+
+plot_BD
+
+plot_sp <- pyt_functional_1$environment
+pyt_functional_1 %>% 
+     ggplot(.,aes(x=swelling.power, fill=environment))+ geom_density(alpha=0.75)
+
+plot_sp
+
+plot_si <- pyt_functional_1$environment
+pyt_functional_1 %>% 
+     ggplot(.,aes(x=swelling.index, fill=environment))+ geom_density(alpha=0.75)
+
+plot_si
 ```
 
 ```{r making a function to run the mixed model for all the traits without removing outliers}
@@ -449,15 +494,15 @@ Result.h2
 ```
 
 
+
 ```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
 
 snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
 str(snps_dosage)
 genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
-head(snps_dosage[1:10,1:20])
+head(snps_dosage[1:10,1:10])
 
 write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
-
 
 ```
 
@@ -473,35 +518,110 @@ snps_dosage$X <- snps_geno_name$X # with genotype name in correct order
 colnames(snps_dosage)[1] = "geno_name" # rename column 1 of the snps file
 snps_dosage[1:10, 1:20]
 rownames(snps_dosage) <- snps_dosage$geno_name # Naming the row names
+```
+
+```{r removing missing data from the snps file}
+#removing missing data
+for (j in 1:ncol(snps_dosage)) {
+   snps_dosage[, j] <- ifelse(is.na(snps_dosage[, j]), mean(snps_dosage[, j], na.rm = TRUE), snps_dosage[, 
+        j])
+}
+
+table(rownames(snps_dosage) == pyt_functional_1$Genotype)
+
+table(pyt_functional_1$Genotype == rownames(snps_dosage) )
+
 snps_dosage1 = snps_dosage[,-1] # remove the column 1 of the snps file
 # new_snp <- cbind(geno_name,snps_dosage) # Combine the new and old order genotype names in one data frame.
+```
 
+```{r A.mat and heatmap for A.mat}
  # character
 library(sommer)
 library(devtools)
-install.packages("rrBLUP")
 library(rrBLUP)
 snps_dosage1_Amat <- A.mat(snps_dosage1)
 dim(snps_dosage1_Amat)
 heatmap(snps_dosage1_Amat) 
+```
+
+```{r, looking for snps that are not in the phenotype data}
+# gen = which(rownames(snps_dosage) %in%pyt_functional_1$Genotype ) # 
+# Subset the pheno data that has snp data 
+gt = which(pyt_functional_1$Genotype %in% rownames(snps_dosage) ) # identify the row number/genotype name those gentypes from pheno to snps
+
+
+phen1 = droplevels(pyt_functional_1[gt,]) # subset the pheno data that found in the snp data
+
+head(phen1)
+dim(phen1)
+dim(pyt_functional_1)
+length(rownames(snps_dosage)) # length row name of the snps
+length(levels(as.factor(phen1$Genotype))) # the length of the selected pheno data genotype levels 
+
+# if the legnths are equal no need subseting the snp data
+# but if the length is different we should subset the snp data in relation to the selected pheno genotypes 
+
+gsnp = which(rownames(snps_dosage) %in% levels(phen1$Genotype)) 
+head(snps_dosage[,1:20])
+snp2 = snps_dosage[rownames(snps_dosage)[gsnp],] # subset the snps based on teh genotypes with snp and also phenotype
+dim(snp2)
+length(levels(phen1$Genotype))
+rownames(snp2) %in% levels(phen1$Genotype)
 
 ```
 
+```{r A matrix and the mix model with the new genotype data }
+A = A.mat(snp2)
+dim(A)
 
+mix_wacp <- mmer(WAC~ year + location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:location + Genotype:year+ year:location ,
+             rcov=~units,
+             data=phen1)
+summary(mix_wacp)$varcomp
 
-```{r use the genotypic data to see if the narrow sense heriability will be high ansubsetting the needed genotpic data}
+vpredict(mix_wacp, h1 ~ V1/(V1+(V3/3)+(V5/6)) )
 
-
-
-
-
+#mix_wac <- mmer(predicted.value~ 1,
+             #random=~vsr(Genotype, Gu=A),
+             #rcov=~units,
+             #data=pm)
+#summary(mix_wac)$varcomp
+#pr = predict.mmer(object = mix_wacp, classify = "Genotype")
+#pm =  pr$pvals
+#summary(mix_wac)$varcomp
+#h1 ~ V1/(V1+V3
+#### calculate heritability
+#vpredict(mix_wac, h1 ~ V1/(V1+V3) )
 ```
 
-```{r looking for missing genotypes}
 
-#nrow(match(NIGC2a_snps1, geno_list))
+```{r}
+#gn = droplevels(pyt_functional_1$Genotype[gen]) # genotype name in the pheno data that have snps information
+
+# is.matrix(snps_dosage) 
+# rownames(snps_dosage) = snps_dosage$geno_name
+# snps_dosage = snps_dosage[,-1] # drop the column 1
+# snps_dosage$geno_name
+# head(snps_dosage[,1:10])
+# snps_fns = snps_dosage[phen1$Genotype, phen1$Genotype] # subset the phenotype data that have snps data
+# dim(snps_fns)
+# head(phen1)
+# rownames(snps_fns)%in% phen1$Genotype # check if snp_fns is found in the phen1$Genotype
+# gen2 = rownames(snps_dosage) %in% phen1$Genotype 
+# 
+# Gen3 = snps_dosage[phen1$Genotype, phen1$Genotype]
+# 
+# gen3 <-
+# 
+# pyt_functional_2<-pyt_functional_1[pyt_functional_1$Genotype %in%rownames(snps_dosage),] # pick out the phenotyypes that have snp data snps
+# 
+# dim(pyt_functional_2)
 ```
 
 
+```{r}
 
+```
 
