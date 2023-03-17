@@ -371,7 +371,7 @@ covar_functional  <- cov(pyt_functional_1[,-c(1:4)], use="complete.obs")
 write.csv(corr_functional,file=here("./output/correlation_functional_all_year.csv")) 
 ```
 
-```{r}
+```{r, scatter plots for the covariance of the traits}
 plot(pyt_functional_1$WAC ~ pyt_functional_1$Bulk.Density)
 
 plot(pyt_functional_1$WAC ~ pyt_functional_1$swelling.power)
@@ -414,7 +414,7 @@ Result.h2org<- matrix(nrow = 1, ncol = length(traitname))
 colnames(Result.h2org) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
 rownames(Result.h2org) <- "H2Comb" # heritability for the combine analysis
 Result.vcomporg = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
-colnames(Result.vcomporg) <- c("vg", "vgl","vgy","ev", "vph") # column names for the variance components
+colnames(Result.vcomporg) <- c("vg", "vgl","vgy", "vp","ve") # column names for the variance components
 rownames(Result.vcomporg) <- traitname # row names of the variance components
 for(trait in traitname){
 tr = paste0(trait) # the loop will be able to select  and analyse each trait
@@ -431,14 +431,14 @@ sv <- as.data.frame(ss$varcor) # get the variance component
 gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
 gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
 gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance
-ev <- sv[sv$grp == "Residual" , "vcov"] # residual variance
-vph <- gv + gl/2 + gy/3 + ev/6 # variance due to phenotype
+ve <- sv[sv$grp == "Residual" , "vcov"] # residual variance
+vph <- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
 # make a matrix of the variance output
 H2 <- gv/vph
 Result.vcomporg[trait,1] = gv
 Result.vcomporg[trait,2] = gl
 Result.vcomporg[trait,3] = gy
-Result.vcomporg[trait,4] = ev
+Result.vcomporg[trait,4] = ve
 Result.vcomporg[trait,5] = vph
 Result.h2org[,trait] = H2
 }
@@ -453,7 +453,7 @@ Result.h2 = matrix(nrow = 1, ncol = length(traitname)) # this is how we want the
 colnames(Result.h2) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
 rownames(Result.h2) <- "H2Comb" # heritability for the combine analysis
 Result.vcomp = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
-colnames(Result.vcomp) <- c("vg", "vgl","vgy","ev", "vph") # column names for the variance components
+colnames(Result.vcomp) <- c("vg", "vgl","vgy", "vp","ve") # column names for the variance components
 rownames(Result.vcomp) <- traitname # row names of the variance components
 for(trait in traitname){
 tr = paste0(trait)  # the loop will be able to select  and analyse each trait
@@ -463,6 +463,7 @@ DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_fun
 }else{
 DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
 }
+
 eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = DatWithout_na )")))
 RES_trait<- rstudent(model2) # i am using the model that used data without missing data
 outliers<- which(abs(scale(RES_trait))>3) #Remove outlier
@@ -474,14 +475,14 @@ sv
 gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
 gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
 gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance
-ev <- sv[sv$grp == "Residual" , "vcov"] # residual variance
-vph <- gv + gl/2 + gy/3 + ev/6 # variance due to phenotype
+ve <- sv[sv$grp == "Residual" , "vcov"] # residual variance
+vph <- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
 # make a matrix of the variance output
 H2 <- gv/vph
 Result.vcomp[trait,1] = gv
 Result.vcomp[trait,2] = gl
 Result.vcomp[trait,3] = gy
-Result.vcomp[trait,4] = ev
+Result.vcomp[trait,4] = ve
 Result.vcomp[trait,5] = vph
 Result.h2[,trait] = H2
 }
@@ -490,8 +491,15 @@ Result.vcomp
 
 Result.h2
 
+Result.h2 <- data.frame(Result.h2) # making a data frame for the heritability output
+Result.vcomp <- data.frame(Result.vcomp) #making a data frame for the vcomp output
+T_h2 <- t(Result.h2) # transpose the heritability output
 
+df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frame
+df_lmer 
 ```
+
+
 
 
 
@@ -564,64 +572,123 @@ length(levels(as.factor(phen1$Genotype))) # the length of the selected pheno dat
 
 gsnp = which(rownames(snps_dosage) %in% levels(phen1$Genotype)) 
 head(snps_dosage[,1:20])
-snp2 = snps_dosage[rownames(snps_dosage)[gsnp],] # subset the snps based on teh genotypes with snp and also phenotype
+snp2 = snps_dosage[rownames(snps_dosage)[gsnp],] # subset the snps based on the genotypes with snp and also phenotype
 dim(snp2)
 length(levels(phen1$Genotype))
-rownames(snp2) %in% levels(phen1$Genotype)
+Geno_present <- rownames(snp2) %in% levels(phen1$Genotype)
 
 ```
 
-```{r A matrix and the mix model with the new genotype data }
-A = A.mat(snp2)
-dim(A)
+```{r A matrix and the mixed model with the new genotype GA data }
+library(sommer)
+A <- A.mat(snp2[,-1])
+str(snp2)
+head(snp2)
 
-mix_wacp <- mmer(WAC~ year + location,
-             random=~vsr(Genotype, Gu=A)+ Genotype:location + Genotype:year+ year:location ,
+dim
+
+mix_wac <- mmer(WAC~ year + location+ year:location, 
+             random=~vsr(Genotype, Gu=A) + Genotype:year + Genotype:location,
              rcov=~units,
              data=phen1)
-summary(mix_wacp)$varcomp
 
-vpredict(mix_wacp, h1 ~ V1/(V1+(V3/3)+(V5/6)) )
+summary(mix_wac)$varcomp
 
-#mix_wac <- mmer(predicted.value~ 1,
-             #random=~vsr(Genotype, Gu=A),
-             #rcov=~units,
-             #data=pm)
-#summary(mix_wac)$varcomp
-#pr = predict.mmer(object = mix_wacp, classify = "Genotype")
-#pm =  pr$pvals
-#summary(mix_wac)$varcomp
-#h1 ~ V1/(V1+V3
-#### calculate heritability
-#vpredict(mix_wac, h1 ~ V1/(V1+V3) )
+vpredict(mix_wac, h1 ~ V1/(V1+ (V2/3)+ (V3/2)+(V4/6)) ) # heritability for WAC
+
+
+#Bulk density
+mix_BD <- mmer(Bulk.Density~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)
+summary(mix_BD)$varcomp
+vpredict(mix_BD, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))
+
+#swelling index
+mix_si <- mmer(swelling.index~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)
+summary(mix_si)$varcomp
+vpredict(mix_si, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))
+
+
+mix_sp <- mmer(swelling.power~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)
+summary(mix_sp)$varcomp
+vpredict(mix_sp, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))
+
+
+
+```
+
+
+```{r function to loop all mixed models using the GA matrix for all traits}
+traitnames<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density"))
+library(sommer)
+h2c = tibble() # an empty table that will contain the heritability for all the traits
+vcomp = tibble() # an empty table that will contains the variance components
+names(vcomp) = c("vg","vgl","vgy","vp","ve")
+# h2c = as.data.frame(h2c)
+# rownames(h2c) = traitnames
+# h2c = tibble(h2c)
+for(traits in traitnames){
+ trs = paste0(traits)# the loop will be able to select  and analyse each trait
+eval(parse(text=paste("model1= mmer(",traits,"~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)")))
+
+ss = summary(model1)
+ss = data.frame(ss$varcomp)
+vg = ss[1,"VarComp"] # assigning names to the variance component in column 1
+vgy = ss[2,"VarComp"]
+vgl = ss[3,"VarComp"]
+ve = ss[4,"VarComp"]
+vp =  vg + vgl/2 + vgy/3  + ve/6 
+tt = cbind(vg,vgl, vgy, vp, ve)
+
+rownames(tt) = paste(traits) # This will calculate the heritability of each of the traits
+
+vcomp = rbind(vcomp,tt) # this bind the variance components to the functional properties
+
+name = paste0(traits)
+h2 = vpredict(model1, ~ V1/(V1 + (V2/3) + (V3/2)+(V4/6)) )
+h2 = as.data.frame(h2)
+rownames(h2) = paste0(traits)
+h2c = rbind(h2c,h2)
+
+}
+vcomp
+h2c 
+
 ```
 
 
-```{r}
-#gn = droplevels(pyt_functional_1$Genotype[gen]) # genotype name in the pheno data that have snps information
-
-# is.matrix(snps_dosage) 
-# rownames(snps_dosage) = snps_dosage$geno_name
-# snps_dosage = snps_dosage[,-1] # drop the column 1
-# snps_dosage$geno_name
-# head(snps_dosage[,1:10])
-# snps_fns = snps_dosage[phen1$Genotype, phen1$Genotype] # subset the phenotype data that have snps data
-# dim(snps_fns)
-# head(phen1)
-# rownames(snps_fns)%in% phen1$Genotype # check if snp_fns is found in the phen1$Genotype
-# gen2 = rownames(snps_dosage) %in% phen1$Genotype 
-# 
-# Gen3 = snps_dosage[phen1$Genotype, phen1$Genotype]
-# 
-# gen3 <-
-# 
-# pyt_functional_2<-pyt_functional_1[pyt_functional_1$Genotype %in%rownames(snps_dosage),] # pick out the phenotyypes that have snp data snps
-# 
-# dim(pyt_functional_2)
+```{r binding heritability}
+df_mmer <- cbind(vcomp,h2c) # binding the mmer variance components with heritability
+df_mmer <- data.frame(df_mmer) #converting to a data frame
+colnames(df_mmer)[6] <- "h2" # rename Estimates to h2
+colnames(df_mmer)[7] <- "SE h2"
+View(df_mmer)
+df_mmer
 ```
 
 
-```{r}
+```{r creating tables}
+df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frame
 
+colnames(df_mmer)[6] = "H2Comb"
+df_mmer1 = df_mmer[,-7]
+rownames(df_mmer1) <- c("swelling.index_mmer", "swelling.power_mmer", "WAC_mmer", "Bulk.Density_mmer")
+rownames(df_lmer) <- c("swelling.index_lmer", "swelling.power_lmer", "WAC_lmer", "Bulk.Density_lmer")
+
+lmer_mmer <- rbind(df_lmer, df_mmer1) # bind the two data frame
+
+lmer_mmer
 ```
+
 
