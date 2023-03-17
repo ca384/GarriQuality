@@ -1,0 +1,2769 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+<meta name="date" content="2023-02-10" />
+
+<title>Garri Functional Quality</title>
+
+<script src="site_libs/header-attrs-2.20/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">GarriQuality</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Garri Functional Quality</h1>
+<h4 class="date">2023-02-10</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-03-17
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 2
+</p>
+<p>
+<strong>Knit directory:</strong> <code>GarriQuality/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20230210code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20230210)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20230210code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20230210)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongabsolute">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>File paths:</strong> absolute </a>
+</p>
+</div>
+<div id="strongFilepathsstrongabsolute" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Using absolute paths to the files within your workflowr project makes it
+difficult for you and others to run your code on a different machine.
+Change the absolute path(s) below to the suggested relative path(s) to
+make your code more reproducible.
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+absolute
+</th>
+<th style="text-align:left;">
+relative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv
+</td>
+<td style="text-align:left;">
+data/OTOBI_2022PYT_FUNCTIONAL.csv
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv
+</td>
+<td style="text-align:left;">
+data/UMU_2022_PYT_FUNCTIONAL.csv
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomca384GarriQualitytree605e2ed16a84ed8c8c228994eee06b69573365fbtargetblank605e2eda">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/ca384/GarriQuality/tree/605e2ed16a84ed8c8c228994eee06b69573365fb" target="_blank">605e2ed</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomca384GarriQualitytree605e2ed16a84ed8c8c228994eee06b69573365fbtargetblank605e2eda"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/ca384/GarriQuality/tree/605e2ed16a84ed8c8c228994eee06b69573365fb" target="_blank">605e2ed</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    analysis/.RData
+    Ignored:    analysis/.Rhistory
+    Ignored:    data/.DS_Store
+
+Untracked files:
+    Untracked:  ALL_PYT_GARRI_FUNTIONAL.csv
+    Untracked:  analysis/ALL_PYT_GARRI_FUNTIONAL.csv
+    Untracked:  analysis/PYT_Chemical_Analysis.Rmd
+    Untracked:  analysis/geno_name.csv
+    Untracked:  data/ALL_PYT_GARRI_FUNTIONAL.csv
+    Untracked:  genotype_snps.csv
+    Untracked:  output/correlation_functional_all_year.csv
+    Untracked:  output/heatmap of PYT genotypes.png
+    Untracked:  pyt_functional_all_years.csv
+
+Unstaged changes:
+    Modified:   analysis/Linear_model_garri_quality.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/Linear_model_garri_quality.Rmd</code>) and HTML
+(<code>docs/Linear_model_garri_quality.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/605e2ed16a84ed8c8c228994eee06b69573365fb/analysis/Linear_model_garri_quality.Rmd" target="_blank">605e2ed</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-03-17
+</td>
+<td>
+I sorted the lmer_mmer output
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/e6c854821d5f1ee247ebea7a1c06589ea3567c5e/analysis/Linear_model_garri_quality.Rmd" target="_blank">e6c8548</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-03-17
+</td>
+<td>
+created a function to loop for variance components and heritability for
+mmer and lmer.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/96c8fa3e30830c4a68f79231bae96e79fb028803/analysis/Linear_model_garri_quality.Rmd" target="_blank">96c8fa3</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-03-10
+</td>
+<td>
+SNPs data wrangling; I made the phenotypic data to be equal to the SNPs
+data, I ploted the A matrix with the new SNPs data, and ran the mmer
+models for WAC and Bulk Density. Also made a plot for each trait for all
+the years and locations.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/328d39d4871603ff6c351663dac28f00f39bea97/analysis/Linear_model_garri_quality.Rmd" target="_blank">328d39d</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-03-08
+</td>
+<td>
+Made A matrix (A.mat) using the genetic data of 198 genotypes
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/dddd9fa8acec257baafa8f60b1755c2911b843e3/analysis/Linear_model_garri_quality.Rmd" target="_blank">dddd9fa</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-03-07
+</td>
+<td>
+made a function to run the mixed model for all the traits with the
+outlier and after removing outliers
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/a28ae8a14f7d9d3128ef52f3b45d1400fb13b543/analysis/Linear_model_garri_quality.Rmd" target="_blank">a28ae8a</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-24
+</td>
+<td>
+I tried linear models, the remove outliers using the Guatile method to
+see if outliers were affecting the model (not getting high
+heritability). I also worked on the snp data to remove genotypes that
+are not in the trial also on the pheno data to remove names that were
+spelt wrongly and also rename those that were missinfg certain alphabets
+for example TMEB419 instead of TME419
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/3d4ce563105d45b39b93bf4b7b461863e014895c/analysis/Linear_model_garri_quality.Rmd" target="_blank">3d4ce56</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-21
+</td>
+<td>
+I added 2020/2021 functional data for the two locations. I made a large
+data frame containing the three years and the two locations.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/d6028b929194e4eca6cc13671aa731788d93964c/analysis/Linear_model_garri_quality.Rmd" target="_blank">d6028b9</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-20
+</td>
+<td>
+I created a dataframe for the rownames of the snps_dosage file and
+converted it to the new format of writting genotype names. Now the
+genotype names on the snp file is same as that on the phenotype file.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/6ca148ec108dfaf66a88be1683913a553e73cba6/analysis/Linear_model_garri_quality.Rmd" target="_blank">6ca148e</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-18
+</td>
+<td>
+I called in the 2019 data for Umudike and Otobi. Data wangling and
+combining of the two data frames into one. I also called in the
+genotypic data. This genotypic data does not include the checks.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/23c1dc9c2a15d6c4d2caaf395eeb6e4f5b5a711b/analysis/Linear_model_garri_quality.Rmd" target="_blank">23c1dc9</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-14
+</td>
+<td>
+Conflist between JLJ and Chinedozi
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/f3191b2d1a36b11b8342133b0ad9c5cba4e85ce1/analysis/Linear_model_garri_quality.Rmd" target="_blank">f3191b2</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-14
+</td>
+<td>
+Added a linear model chunk
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/775c55ab2081ffdee106ac78350a2b6a542476bf/analysis/Linear_model_garri_quality.Rmd" target="_blank">775c55a</a>
+</td>
+<td>
+jeanlucj
+</td>
+<td>
+2023-02-14
+</td>
+<td>
+Changes on JLJ’s fork: add here and install packages first
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/8273703fc0a475e580b2f9a78b50be491d1e4e17/analysis/Linear_model_garri_quality.Rmd" target="_blank">8273703</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-14
+</td>
+<td>
+Included 2019_2020 data to the data file.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/592870f67ca1f3c68f2ca10e8d92566abf68da34/analysis/Linear_model_garri_quality.Rmd" target="_blank">592870f</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-13
+</td>
+<td>
+Changes to Linear_model_garri_quality.Rmd
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/d6943df554d6bb75841e2b8d15bd07920f8000e9/analysis/Linear_model_garri_quality.Rmd" target="_blank">d6943df</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-10
+</td>
+<td>
+Trying to get a complete commit
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/87a3ac45423681fdbc673e85dbea059611dd7796/analysis/Linear_model_garri_quality.Rmd" target="_blank">87a3ac4</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-10
+</td>
+<td>
+Commit to add linear model
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/ca384/GarriQuality/blob/0de1e4145335d079bebd411184f3ada8cc12fec5/analysis/Linear_model_garri_quality.Rmd" target="_blank">0de1e41</a>
+</td>
+<td>
+Chinedozi Amaefula
+</td>
+<td>
+2023-02-10
+</td>
+<td>
+New repo for garri quality. I inported the functional qualities for
+Umudike and Otobi for 2022
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>packages_used &lt;- c(&quot;tidyverse&quot;, &quot;ggplot2&quot;, &quot;here&quot;, &quot;stringr&quot; , &quot;sommer&quot;,&quot;lme4&quot;,&quot;metan&quot;, &quot;rrBLUP&quot;)
+ip &lt;- installed.packages()
+all_packages_installed &lt;- TRUE
+for (package in packages_used){
+  if (!(package %in% ip[,&quot;Package&quot;])){
+    print(paste(&quot;Please install package&quot;, package))
+    all_packages_installed &lt;- FALSE
+  }
+}#END packages_used
+if (!all_packages_installed) stop(&quot;Need to install packages&quot;)</code></pre>
+<pre class="r"><code>require(here)</code></pre>
+<pre><code>Loading required package: here</code></pre>
+<pre><code>here() starts at /Users/ca384/Documents/ChinedoziRepo/GarriQuality</code></pre>
+<pre class="r"><code>here::i_am(&quot;analysis/Linear_model_garri_quality.Rmd&quot;)</code></pre>
+<pre><code>here() starts at /Users/ca384/Documents/ChinedoziRepo/GarriQuality</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+✔ ggplot2 3.4.1     ✔ purrr   1.0.1
+✔ tibble  3.1.8     ✔ dplyr   1.1.0
+✔ tidyr   1.3.0     ✔ stringr 1.5.0
+✔ readr   2.1.4     ✔ forcats 1.0.0
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>Oto_22_func &lt;- read.csv(here::here(&quot;data&quot;, &quot;OTOBI_2022PYT_FUNCTIONAL.csv&quot;), head=T)
+
+# Oto_22_func&lt;-read.csv(&quot;/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv&quot;, head=T) # data for Otobi wit swelling power, swelling indx, bulk denSIty and water absorbing capacity for 2022
+Umu_22_func &lt;- read.csv(here::here(&quot;data/UMU_2022_PYT_FUNCTIONAL.csv&quot;), head=T)
+# Umu_22_func&lt;-read.csv(&quot;/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/UMU_2022_PYT_FUNCTIONAL.csv&quot;,head=T)# data for Umudike wit swelling power, swelling index, bulk denSIty and water absorbing capacity for 2022
+
+str(Oto_22_func)</code></pre>
+<pre><code>&#39;data.frame&#39;:   176 obs. of  5 variables:
+ $ Genotype      : chr  &quot;IITA-TMS-1BA30572&quot; &quot;NR17C2aF103P001&quot; &quot;NR17C2aF10P001&quot; &quot;NR17C2aF10P002&quot; ...
+ $ swelling.index: num  2.44 2.5 2.32 3.15 2.36 ...
+ $ swelling.power: num  6.5 7.64 6.24 6.99 7.5 ...
+ $ wac.          : int  540 545 477 503 520 573 489 496 573 519 ...
+ $ Bulk.Density  : num  0.828 0.769 0.833 0.719 0.816 0.839 0.79 0.857 0.781 0.715 ...</code></pre>
+<pre class="r"><code>str(Umu_22_func)</code></pre>
+<pre><code>&#39;data.frame&#39;:   157 obs. of  6 variables:
+ $ sn            : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ Genotype      : chr  &quot;IITA-TMS-IBA30572&quot; &quot;NR17C2aF103P001&quot; &quot;NR17C2aF10P001&quot; &quot;NR17C2aF10P002&quot; ...
+ $ Swelling.index: num  3 2.96 2.92 3.2 3.08 ...
+ $ swelling.power: num  7.23 7.73 8.62 8.11 7.3 ...
+ $ wac.          : num  598 536 588 617 539 602 655 526 630 574 ...
+ $ AverageBD     : num  0.79 0.76 0.845 0.76 0.75 0.714 0.741 0.833 0.726 0.75 ...</code></pre>
+<pre class="r"><code>Oto_22_func$Genotype&lt;-as.factor(Oto_22_func$Genotype)
+Oto_22_func$wac.&lt;-as.numeric(Oto_22_func$wac.)
+Umu_22_func$Genotype&lt;-as.factor(Umu_22_func$Genotype)
+head(Umu_22_func)</code></pre>
+<pre><code>  sn          Genotype Swelling.index swelling.power wac. AverageBD
+1  1 IITA-TMS-IBA30572          3.000          7.234  598     0.790
+2  2   NR17C2aF103P001          2.960          7.729  536     0.760
+3  3    NR17C2aF10P001          2.917          8.621  588     0.845
+4  4    NR17C2aF10P002          3.200          8.109  617     0.760
+5  5    NR17C2aF10P006          3.083          7.299  539     0.750
+6  6    NR17C2aF10P011          2.600          9.979  602     0.714</code></pre>
+<pre class="r"><code>head(Oto_22_func)</code></pre>
+<pre><code>           Genotype swelling.index swelling.power wac. Bulk.Density
+1 IITA-TMS-1BA30572          2.440          6.500  540        0.828
+2   NR17C2aF103P001          2.500          7.645  545        0.769
+3    NR17C2aF10P001          2.320          6.235  477        0.833
+4    NR17C2aF10P002          3.150          6.989  503        0.719
+5    NR17C2aF10P006          2.357          7.500  520        0.816
+6    NR17C2aF10P016          2.483          7.376  573        0.839</code></pre>
+<pre class="r"><code>str(Oto_22_func)</code></pre>
+<pre><code>&#39;data.frame&#39;:   176 obs. of  5 variables:
+ $ Genotype      : Factor w/ 176 levels &quot;IITA-TMS-1BA30572&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ swelling.index: num  2.44 2.5 2.32 3.15 2.36 ...
+ $ swelling.power: num  6.5 7.64 6.24 6.99 7.5 ...
+ $ wac.          : num  540 545 477 503 520 573 489 496 573 519 ...
+ $ Bulk.Density  : num  0.828 0.769 0.833 0.719 0.816 0.839 0.79 0.857 0.781 0.715 ...</code></pre>
+<pre class="r"><code>str(Umu_22_func)</code></pre>
+<pre><code>&#39;data.frame&#39;:   157 obs. of  6 variables:
+ $ sn            : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ Genotype      : Factor w/ 157 levels &quot;IITA-TMS-IBA30572&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ Swelling.index: num  3 2.96 2.92 3.2 3.08 ...
+ $ swelling.power: num  7.23 7.73 8.62 8.11 7.3 ...
+ $ wac.          : num  598 536 588 617 539 602 655 526 630 574 ...
+ $ AverageBD     : num  0.79 0.76 0.845 0.76 0.75 0.714 0.741 0.833 0.726 0.75 ...</code></pre>
+<pre class="r"><code>summary(Oto_22_func)</code></pre>
+<pre><code>              Genotype   swelling.index  swelling.power       wac.      
+ IITA-TMS-1BA30572:  1   Min.   :2.037   Min.   :5.701   Min.   :177.0  
+ NR17C2aF103P001  :  1   1st Qu.:2.400   1st Qu.:6.875   1st Qu.:487.0  
+ NR17C2aF10P001   :  1   Median :2.600   Median :7.231   Median :513.0  
+ NR17C2aF10P002   :  1   Mean   :2.633   Mean   :7.236   Mean   :509.0  
+ NR17C2aF10P006   :  1   3rd Qu.:2.800   3rd Qu.:7.625   3rd Qu.:540.2  
+ NR17C2aF10P016   :  1   Max.   :3.524   Max.   :9.531   Max.   :633.0  
+ (Other)          :170                                                  
+  Bulk.Density   
+ Min.   :0.6740  
+ 1st Qu.:0.7790  
+ Median :0.8110  
+ Mean   :0.8091  
+ 3rd Qu.:0.8330  
+ Max.   :1.5120  
+                 </code></pre>
+<pre class="r"><code>summary(Umu_22_func)</code></pre>
+<pre><code>       sn                   Genotype   Swelling.index  swelling.power  
+ Min.   :  1   IITA-TMS-IBA30572:  1   Min.   :1.964   Min.   : 5.926  
+ 1st Qu.: 40   NR17C2aF103P001  :  1   1st Qu.:2.642   1st Qu.: 7.192  
+ Median : 79   NR17C2aF10P001   :  1   Median :2.860   Median : 7.959  
+ Mean   : 79   NR17C2aF10P002   :  1   Mean   :2.894   Mean   : 8.057  
+ 3rd Qu.:118   NR17C2aF10P006   :  1   3rd Qu.:3.095   3rd Qu.: 8.923  
+ Max.   :157   NR17C2aF10P011   :  1   Max.   :4.000   Max.   :10.309  
+               (Other)          :151                                   
+      wac.       AverageBD     
+ Min.   :218   Min.   :0.5940  
+ 1st Qu.:508   1st Qu.:0.7500  
+ Median :549   Median :0.7890  
+ Mean   :546   Mean   :0.7832  
+ 3rd Qu.:588   3rd Qu.:0.8220  
+ Max.   :694   Max.   :0.9520  
+                               </code></pre>
+<pre class="r"><code>boxplot(Oto_22_func$wac. , main=&quot;Water absorbing capacity of garri OTO&quot;,ylab = &quot;WAC&quot;,xlab=&quot;Genotypes&quot;)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/creating%20plots-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>boxplot(Umu_22_func$wac. , main=&quot;Water absorbing capacity of garri UMU&quot;,ylab=&quot;WAC&quot;, xlab=&quot;Genotypes&quot;) #Removing outliers using the boxplot method</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/creating%20plots-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(ggplot2)
+
+par(mfrow=c(2,2))
+boxplot(Oto_22_func$swelling.index, xlab=&quot;Genotypes&quot;, ylab=&quot;SI&quot;)
+boxplot(Oto_22_func$swelling.power, ylab=&quot;SP&quot;,xlab=&quot;Genotypes&quot;)
+boxplot(Oto_22_func$wac.,ylab=&quot;WAC&quot;, xlab=&quot;Genotypes&quot;)
+boxplot(Oto_22_func$Bulk.Density, xlab=&quot;Genotypes&quot;, ylab=&quot;Bulk density&quot;)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/creating%20plots-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(&quot;dplyr&quot;) #Using rename()
+
+colnames(Oto_22_func)</code></pre>
+<pre><code>[1] &quot;Genotype&quot;       &quot;swelling.index&quot; &quot;swelling.power&quot; &quot;wac.&quot;          
+[5] &quot;Bulk.Density&quot;  </code></pre>
+<pre class="r"><code>colnames(Umu_22_func)</code></pre>
+<pre><code>[1] &quot;sn&quot;             &quot;Genotype&quot;       &quot;Swelling.index&quot; &quot;swelling.power&quot;
+[5] &quot;wac.&quot;           &quot;AverageBD&quot;     </code></pre>
+<pre class="r"><code>Umu_22_func &lt;- Umu_22_func %&gt;% 
+       rename(Bulk.Density = AverageBD) # rename bulk density
+
+Umu_22_func &lt;- Umu_22_func %&gt;% 
+       rename(WAC= wac.) # rename wac. to WAC
+Umu_22_func &lt;- Umu_22_func %&gt;% 
+       rename(swelling.index= Swelling.index) # rename wac. to WAC
+
+
+
+Oto_22_func &lt;- Oto_22_func %&gt;% 
+       rename(WAC= wac.) # rename wac. to WAC for otobi</code></pre>
+<pre class="r"><code>library(tidyverse)
+Umu_22_func &lt;-Umu_22_func %&gt;%
+  add_column(location = &quot;Umudike&quot;, year=&quot;2022&quot;) # add column with location and year for Umudike
+
+Umu_22_func &lt;- subset(Umu_22_func, select=-c(sn)) # Remove the sn
+
+Umu_22_func &lt;- Umu_22_func %&gt;% relocate(location, year) # change the position of the location and year
+
+Oto_22_func &lt;- Oto_22_func %&gt;%
+  add_column(location = &quot;Otobi&quot;, year=&quot;2022&quot;) %&gt;% relocate(location, year)
+# change the position of location and year from last column to the first column</code></pre>
+<pre class="r"><code>Umu_oto_22 &lt;- rbind(Oto_22_func, y=Umu_22_func)
+
+
+Umu_oto_22$location &lt;- as.factor(Umu_oto_22$location)
+Umu_oto_22$year &lt;- as.factor(Umu_oto_22$year)
+
+
+plot(Umu_oto_22)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/joining%20the%20two%20data%20frames-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>colnames(Umu_oto_22)</code></pre>
+<pre><code>[1] &quot;location&quot;       &quot;year&quot;           &quot;Genotype&quot;       &quot;swelling.index&quot;
+[5] &quot;swelling.power&quot; &quot;WAC&quot;            &quot;Bulk.Density&quot;  </code></pre>
+<div id="change-oto-and-umu_19-to-umu_20" class="section level1">
+<h1>change Oto and Umu_19 to Umu_20</h1>
+<pre class="r"><code>Oto_19 &lt;- read.csv(here::here(&quot;data&quot;, &quot;functional-otobi2019_2020.csv&quot;), head=T)
+
+Umu_19 &lt;- read.csv(here::here(&quot;data&quot;, &quot;Umu_func_pyt2019_2020.csv&quot;), head=T)
+
+colnames(Oto_19)</code></pre>
+<pre><code> [1] &quot;sample_id&quot;                      &quot;location&quot;                      
+ [3] &quot;duplicate&quot;                      &quot;WAC&quot;                           
+ [5] &quot;Swelling.Index..final.initial.&quot; &quot;SP&quot;                            
+ [7] &quot;SOLUBILITY&quot;                     &quot;Dry.Matter&quot;                    
+ [9] &quot;Moisture&quot;                       &quot;Bulk.Density..g.ml.&quot;           </code></pre>
+<pre class="r"><code>colnames(Umu_19)</code></pre>
+<pre><code>[1] &quot;Genotypes&quot;      &quot;location&quot;       &quot;swelling.index&quot; &quot;swelling.power&quot;
+[5] &quot;WAC&quot;            &quot;Bulk.Density&quot;   &quot;X..Dry.Matter&quot;  &quot;X.moisture&quot;    
+[9] &quot;solubiility&quot;   </code></pre>
+<pre class="r"><code>Oto_19 &lt;- Oto_19 %&gt;% 
+       rename(Genotype= sample_id)
+
+Umu_19 &lt;- Umu_19 %&gt;% 
+       rename(Genotype= Genotypes)
+
+Umu_19 &lt;- Umu_19 %&gt;% 
+       rename(Moisture = X.moisture)
+
+Umu_19 &lt;- Umu_19 %&gt;% 
+       rename(Dry.Matter =X..Dry.Matter)
+
+Oto_19 &lt;- Oto_19 %&gt;% 
+       rename(swelling.index=Swelling.Index..final.initial.)
+
+Oto_19 &lt;- Oto_19 %&gt;% 
+       rename(swelling.power= SP)
+
+Oto_19 &lt;- Oto_19 %&gt;% 
+       rename(Bulk.Density= Bulk.Density..g.ml.)
+
+colnames(Oto_19)</code></pre>
+<pre><code> [1] &quot;Genotype&quot;       &quot;location&quot;       &quot;duplicate&quot;      &quot;WAC&quot;           
+ [5] &quot;swelling.index&quot; &quot;swelling.power&quot; &quot;SOLUBILITY&quot;     &quot;Dry.Matter&quot;    
+ [9] &quot;Moisture&quot;       &quot;Bulk.Density&quot;  </code></pre>
+<pre class="r"><code>colnames(Umu_19)</code></pre>
+<pre><code>[1] &quot;Genotype&quot;       &quot;location&quot;       &quot;swelling.index&quot; &quot;swelling.power&quot;
+[5] &quot;WAC&quot;            &quot;Bulk.Density&quot;   &quot;Dry.Matter&quot;     &quot;Moisture&quot;      
+[9] &quot;solubiility&quot;   </code></pre>
+<pre class="r"><code>dim(Oto_19)</code></pre>
+<pre><code>[1] 84 10</code></pre>
+<pre class="r"><code>dim(Umu_19)</code></pre>
+<pre><code>[1] 31  9</code></pre>
+</div>
+<div id="rename-oto_selected_aggre" class="section level1">
+<h1>Rename Oto_Selected_aggre</h1>
+<pre class="r"><code> #selecting  column
+
+Oto_Selected &lt;- Oto_19 %&gt;% dplyr::select(&quot;location&quot;, &quot;Genotype&quot; ,&quot;swelling.index&quot;, &quot;swelling.power&quot;, &quot;WAC&quot;          , &quot;Bulk.Density&quot; )
+
+
+#taking the average of the genotypes duplicates for otobi
+Oto_Selected_aggre &lt;- Oto_Selected %&gt;% group_by(Genotype) %&gt;%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+str(Oto_Selected_aggre)</code></pre>
+<pre><code>tibble [42 × 5] (S3: tbl_df/tbl/data.frame)
+ $ Genotype      : chr [1:42] &quot;IITA-TMS-IBA30572&quot; &quot;NR17C2aF103P001&quot; &quot;NR17C2aF10P002&quot; &quot;NR17C2aF10P006&quot; ...
+ $ swelling.index: num [1:42] 1.91 2.01 2.1 2.2 2.09 ...
+ $ swelling.power: num [1:42] 6.78 7.24 6.89 6.83 7.47 ...
+ $ WAC           : num [1:42] 368 479 550 450 538 ...
+ $ Bulk.Density  : num [1:42] 0.905 0.93 0.92 0.91 0.855 0.83 0.825 0.88 0.875 0.77 ...</code></pre>
+<pre class="r"><code>Oto_Selected_aggre$Genotype &lt;- as.factor(Oto_Selected_aggre$Genotype)
+
+#Add columns for years and location
+Oto_Selected_aggre  &lt;-  Oto_Selected_aggre  %&gt;%
+  add_column(location = &quot;Otobi&quot;,year = &quot;2020&quot;) # change the year from 2019 to 2020
+ 
+
+
+Umu_Selected &lt;- Umu_19 %&gt;% dplyr:: select(&#39;Genotype&#39;, &#39;swelling.index&#39;, &#39;swelling.power&#39;, &#39;WAC&#39;, &#39;Bulk.Density&#39;) # select the needed columns
+ 
+Umu_Selected  &lt;-  Umu_Selected  %&gt;%
+  add_column(location = &quot;Umudike&quot;,year = &quot;2020&quot;) # add location and year to the data frame
+
+
+#add otobi and umudike 2019 data 
+Umu_oto_19 &lt;- rbind(Oto_Selected_aggre,Umu_Selected)
+str(Umu_oto_19)</code></pre>
+<pre><code>tibble [73 × 7] (S3: tbl_df/tbl/data.frame)
+ $ Genotype      : Factor w/ 50 levels &quot;IITA-TMS-IBA30572&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ swelling.index: num [1:73] 1.91 2.01 2.1 2.2 2.09 ...
+ $ swelling.power: num [1:73] 6.78 7.24 6.89 6.83 7.47 ...
+ $ WAC           : num [1:73] 368 479 550 450 538 ...
+ $ Bulk.Density  : num [1:73] 0.905 0.93 0.92 0.91 0.855 0.83 0.825 0.88 0.875 0.77 ...
+ $ location      : chr [1:73] &quot;Otobi&quot; &quot;Otobi&quot; &quot;Otobi&quot; &quot;Otobi&quot; ...
+ $ year          : chr [1:73] &quot;2020&quot; &quot;2020&quot; &quot;2020&quot; &quot;2020&quot; ...</code></pre>
+<pre class="r"><code>Umu_oto_19$location &lt;-  as.factor(Umu_oto_19$location)
+Umu_oto_19$year &lt;-  as.factor(Umu_oto_19$year)
+Umu_oto_19 &lt;- data.frame(Umu_oto_19 )
+Umu_oto_19 &lt;-  Umu_oto_19  %&gt;% relocate(location, year) # change the positions of year and location</code></pre>
+<pre class="r"><code>Umu_21 &lt;- read.csv(here::here(&quot;data&quot;, &quot;Umu_2020_2021_PYT_Functional.csv&quot;), head=T) # input genotypes planted in 2020 and harvested in 2021
+
+Oto_21 &lt;- read.csv(here::here(&quot;data&quot;, &quot;OTOBI_2020_2021_PYT_Functional.csv&quot;), head=T)
+
+
+dim(Umu_21)</code></pre>
+<pre><code>[1] 133   5</code></pre>
+<pre class="r"><code>Umu_21$Genotypes &lt;- as.factor(Umu_21$Genotypes)
+Umu_21 &lt;- Umu_21 %&gt;% 
+       rename(Genotype= Genotypes) # rename Genotypes to genotype
+Umu_21 &lt;- Umu_21 %&gt;% 
+       rename(swelling.index= Swelling.index)
+
+Umu_21$WAC &lt;- as.numeric(Umu_21$WAC)
+
+Oto_21$Genotype &lt;- as.factor(Oto_21$Genotype)
+dim(Oto_21)</code></pre>
+<pre><code>[1] 174   5</code></pre>
+<pre class="r"><code>Umu_21  &lt;-  Umu_21  %&gt;%
+  add_column(location = &quot;Umudike&quot;,year = &quot;2021&quot;) # add year and location to Umu_21
+Oto_21  &lt;-  Oto_21  %&gt;%
+  add_column(location = &quot;Otobi&quot;,year = &quot;2021&quot;) # add year and location to oto_21
+
+ Umu_oto_21 &lt;- rbind(Oto_21, Umu_21)# combining the two data frame
+
+ Umu_oto_21 &lt;-  Umu_oto_21 %&gt;% relocate(location, year) # change the position of year and location</code></pre>
+<pre class="r"><code>pyt_functional &lt;- rbind(Umu_oto_19, Umu_oto_21, Umu_oto_22) # combine all three years
+dim(pyt_functional)</code></pre>
+<pre><code>[1] 713   7</code></pre>
+<pre class="r"><code>pyt_functional = as.data.frame(pyt_functional)</code></pre>
+<pre class="r"><code># create a new column that has Environment to make it look like the data frame in sommer example
+#rm(pyt_functional_1)
+pyt_functional_1 &lt;- pyt_functional %&gt;%
+unite( &#39;environment&#39;, location:year, sep= &quot;_&quot;, remove = FALSE) # concantenating location and environment
+
+
+#summary(wac_model)$varcomp
+# pyt_functional_1$environment = gsub(pattern = &quot; &quot;,replacement = &quot;_&quot;, x = pyt_functional_1$environment)
+#pyt_functional_1$environment = as.factor(pyt_functional_1$environment)</code></pre>
+<pre class="r"><code>head(pyt_functional_1)</code></pre>
+<pre><code>  environment location year          Genotype swelling.index swelling.power
+1  Otobi_2020    Otobi 2020 IITA-TMS-IBA30572          1.910          6.775
+2  Otobi_2020    Otobi 2020   NR17C2aF103P001          2.015          7.240
+3  Otobi_2020    Otobi 2020    NR17C2aF10P002          2.100          6.895
+4  Otobi_2020    Otobi 2020    NR17C2aF10P006          2.200          6.835
+5  Otobi_2020    Otobi 2020    NR17C2aF10P017          2.090          7.475
+6  Otobi_2020    Otobi 2020    NR17C2aF10P025          1.920          7.445
+    WAC Bulk.Density
+1 368.0        0.905
+2 479.0        0.930
+3 550.5        0.920
+4 450.0        0.910
+5 538.0        0.855
+6 392.5        0.830</code></pre>
+<pre class="r"><code>levels(pyt_functional_1$Genotype)[levels(pyt_functional_1$Genotype) ==&quot;TME419&quot;] = &quot;TMEB419&quot; # changing genotype name pattern
+
+levels(pyt_functional_1$Genotype)[levels(pyt_functional_1$Genotype) ==&quot;IITA-TMS-1BA30572&quot; ] = &quot;IITA-TMS-IBA30572&quot; # changing genotype name pattern
+pyt_functional_1$Genotype = gsub(pattern = &quot; &quot;, replacement = &quot;&quot;, x = pyt_functional_1$Genotype) # remove space from the genotype name 
+
+
+library(metan)</code></pre>
+<pre><code>Registered S3 method overwritten by &#39;GGally&#39;:
+  method from   
+  +.gg   ggplot2</code></pre>
+<pre><code>|=========================================================|</code></pre>
+<pre><code>| Multi-Environment Trial Analysis (metan) v1.17.0        |</code></pre>
+<pre><code>| Author: Tiago Olivoto                                   |</code></pre>
+<pre><code>| Type &#39;citation(&#39;metan&#39;)&#39; to know how to cite metan      |</code></pre>
+<pre><code>| Type &#39;vignette(&#39;metan_start&#39;)&#39; for a short tutorial     |</code></pre>
+<pre><code>| Visit &#39;https://bit.ly/pkgmetan&#39; for a complete tutorial |</code></pre>
+<pre><code>|=========================================================|</code></pre>
+<pre><code>
+Attaching package: &#39;metan&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:forcats&#39;:
+
+    as_factor</code></pre>
+<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+
+    recode_factor</code></pre>
+<pre><code>The following object is masked from &#39;package:tidyr&#39;:
+
+    replace_na</code></pre>
+<pre><code>The following objects are masked from &#39;package:tibble&#39;:
+
+    column_to_rownames, remove_rownames, rownames_to_column</code></pre>
+<pre class="r"><code>pyt_functional_1 &lt;-  as.data.frame(pyt_functional_1)
+pyt_functional_1 &lt;- as_factor(.data = pyt_functional_1, 
+                c(&quot;environment&quot;,&quot;location&quot;,&quot;year&quot;,&quot;Genotype&quot;))
+str(pyt_functional_1)</code></pre>
+<pre><code>&#39;data.frame&#39;:   713 obs. of  8 variables:
+ $ environment   : Factor w/ 6 levels &quot;Otobi_2020&quot;,&quot;Otobi_2021&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ location      : Factor w/ 2 levels &quot;Otobi&quot;,&quot;Umudike&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+ $ year          : Factor w/ 3 levels &quot;2020&quot;,&quot;2021&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ Genotype      : Factor w/ 202 levels &quot;IITA-TMS-IBA30572&quot;,..: 1 2 4 5 8 10 12 16 18 19 ...
+ $ swelling.index: num  1.91 2.01 2.1 2.2 2.09 ...
+ $ swelling.power: num  6.78 7.24 6.89 6.83 7.47 ...
+ $ WAC           : num  368 479 550 450 538 ...
+ $ Bulk.Density  : num  0.905 0.93 0.92 0.91 0.855 0.83 0.825 0.88 0.875 0.77 ...</code></pre>
+<pre class="r"><code>length(levels(pyt_functional_1$Genotype))</code></pre>
+<pre><code>[1] 202</code></pre>
+<pre class="r"><code>#exm = as_numeric(.data = pyt_functional_1, c(&quot;swelling.index&quot;,&quot;swelling.power&quot;,&quot;WAC&quot;,&quot;Bulk.DensIty&quot;))
+#str(exm)
+
+write.csv(x = pyt_functional_1$Genotype, file = &quot;pyt_functional_all_years.csv&quot;)</code></pre>
+<pre class="r"><code>str(pyt_functional_1)</code></pre>
+<pre><code>&#39;data.frame&#39;:   713 obs. of  8 variables:
+ $ environment   : Factor w/ 6 levels &quot;Otobi_2020&quot;,&quot;Otobi_2021&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ location      : Factor w/ 2 levels &quot;Otobi&quot;,&quot;Umudike&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+ $ year          : Factor w/ 3 levels &quot;2020&quot;,&quot;2021&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ Genotype      : Factor w/ 202 levels &quot;IITA-TMS-IBA30572&quot;,..: 1 2 4 5 8 10 12 16 18 19 ...
+ $ swelling.index: num  1.91 2.01 2.1 2.2 2.09 ...
+ $ swelling.power: num  6.78 7.24 6.89 6.83 7.47 ...
+ $ WAC           : num  368 479 550 450 538 ...
+ $ Bulk.Density  : num  0.905 0.93 0.92 0.91 0.855 0.83 0.825 0.88 0.875 0.77 ...</code></pre>
+<pre class="r"><code>boxplot</code></pre>
+<pre><code>function (x, ...) 
+UseMethod(&quot;boxplot&quot;)
+&lt;bytecode: 0x7fc50b82d5a8&gt;
+&lt;environment: namespace:graphics&gt;</code></pre>
+<pre class="r"><code>ggplot(data = pyt_functional_1,aes(x=year,y= swelling.index,fill=location)) +
+  geom_boxplot() + facet_grid(.~location)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_boxplot()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/boxplot%20using%20the%20large%20data%20frame-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(data = pyt_functional_1,aes(x=year,y= swelling.power,fill=location)) +
+  geom_boxplot()+facet_grid(.~location)</code></pre>
+<pre><code>Warning: Removed 9 rows containing non-finite values (`stat_boxplot()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/boxplot%20using%20the%20large%20data%20frame-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(data = pyt_functional_1,aes(x=year,y= WAC,fill=location))+
+  geom_boxplot()+facet_grid(.~location)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_boxplot()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/boxplot%20using%20the%20large%20data%20frame-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(data = pyt_functional_1,aes(x=year,y= Bulk.Density,fill=location))+
+  geom_boxplot()+facet_grid(.~location)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_boxplot()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/boxplot%20using%20the%20large%20data%20frame-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>quartiles_SI &lt;- quantile(pyt_functional_1$swelling.index, probs=c(.25, .75), na.rm = TRUE) # qualtile for swelling index
+IQR_SI &lt;- IQR(pyt_functional_1$swelling.index, na.rm = TRUE) # interquatile range  
+ 
+Lower_SI &lt;- quartiles_SI[1] - 1.5*IQR_SI
+Upper_SI &lt;- quartiles_SI[2] + 1.5*IQR_SI
+ 
+data_no_outlier_SI &lt;- subset(pyt_functional_1, pyt_functional_1$swelling.index &gt; Lower_SI &amp; pyt_functional_1$swelling.index &lt; Upper_SI)
+ 
+dim(data_no_outlier_SI)</code></pre>
+<pre><code>[1] 697   8</code></pre>
+<pre class="r"><code>ggplot(data = data_no_outlier_SI,aes(x=year,y= swelling.index,fill=location)) +
+  geom_boxplot() + facet_grid(.~location)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/removing%20outliers%20for%20swelling%20index%20using%20the%20quatile%20and%20interquatile%20ranges-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>quartiles_WAC &lt;- quantile(pyt_functional_1$WAC, probs=c(.25, .75), na.rm = TRUE) # qualtile for swelling index
+IQR_WAC &lt;- IQR(pyt_functional_1$WAC, na.rm = TRUE) # interquatile range  
+ 
+Lower_WAC &lt;- quartiles_WAC[1] - 1.5*IQR_WAC
+Upper_WAC &lt;- quartiles_WAC[2] + 1.5*IQR_WAC
+ 
+data_no_outlier_WAC &lt;- subset(pyt_functional_1, pyt_functional_1$WAC &gt; Lower_WAC &amp; pyt_functional_1$WAC &lt; Upper_WAC)
+ 
+dim(data_no_outlier_WAC)</code></pre>
+<pre><code>[1] 694   8</code></pre>
+<pre class="r"><code>ggplot(data = data_no_outlier_WAC,aes(x=year,y= WAC,fill=location)) +
+  geom_boxplot() + facet_grid(.~location)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/remove%20outlier%20for%20bulk%20density-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(data = pyt_functional_1,aes(x=year,y= WAC,fill=location))+
+  geom_boxplot()+facet_grid(.~location)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_boxplot()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/remove%20outlier%20for%20bulk%20density-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>oto20  &lt;- droplevels(pyt_functional_1[pyt_functional_1$environment == &quot;Otobi_2020&quot;,])
+oto21  &lt;- droplevels(pyt_functional_1[pyt_functional_1$environment == &quot;Otobi_2021&quot;,])
+oto22  &lt;- droplevels(pyt_functional_1[pyt_functional_1$environment == &quot;Otobi_2022&quot;,])
+ 
+summary(oto20)</code></pre>
+<pre><code>     environment  location    year                 Genotype  swelling.index 
+ Otobi_2020:42   Otobi:42   2020:42   IITA-TMS-IBA30572: 1   Min.   :1.670  
+                                      NR17C2aF103P001  : 1   1st Qu.:1.936  
+                                      NR17C2aF10P002   : 1   Median :2.090  
+                                      NR17C2aF10P006   : 1   Mean   :2.121  
+                                      NR17C2aF10P017   : 1   3rd Qu.:2.303  
+                                      NR17C2aF10P025   : 1   Max.   :2.490  
+                                      (Other)          :36                  
+ swelling.power       WAC         Bulk.Density   
+ Min.   :6.055   Min.   :368.0   Min.   :0.6850  
+ 1st Qu.:6.865   1st Qu.:430.6   1st Qu.:0.8263  
+ Median :7.022   Median :462.5   Median :0.8550  
+ Mean   :7.007   Mean   :465.1   Mean   :0.8488  
+ 3rd Qu.:7.236   3rd Qu.:496.5   3rd Qu.:0.8750  
+ Max.   :7.505   Max.   :554.5   Max.   :0.9400  
+                                                 </code></pre>
+<pre class="r"><code>summary(oto21)</code></pre>
+<pre><code>     environment   location     year                  Genotype  
+ Otobi_2021:174   Otobi:174   2021:174   IITA-TMS-IBA30572:  1  
+                                         NR17C2aF103P001  :  1  
+                                         NR17C2aF10P001   :  1  
+                                         NR17C2aF10P002   :  1  
+                                         NR17C2aF10P006   :  1  
+                                         NR17C2aF10P016   :  1  
+                                         (Other)          :168  
+ swelling.index  swelling.power        WAC         Bulk.Density   
+ Min.   :1.524   Min.   : 6.385   Min.   :311.5   Min.   :0.7060  
+ 1st Qu.:1.911   1st Qu.: 7.794   1st Qu.:375.6   1st Qu.:0.8580  
+ Median :2.039   Median : 8.181   Median :406.8   Median :0.8880  
+ Mean   :2.051   Mean   : 8.261   Mean   :408.8   Mean   :0.8879  
+ 3rd Qu.:2.208   3rd Qu.: 8.761   3rd Qu.:437.6   3rd Qu.:0.9097  
+ Max.   :2.781   Max.   :11.210   Max.   :567.0   Max.   :1.0150  
+ NA&#39;s   :2       NA&#39;s   :2                                        </code></pre>
+<pre class="r"><code>summary(oto22)</code></pre>
+<pre><code>     environment   location     year                  Genotype  
+ Otobi_2022:176   Otobi:176   2022:176   IITA-TMS-IBA30572:  1  
+                                         NR17C2aF103P001  :  1  
+                                         NR17C2aF10P001   :  1  
+                                         NR17C2aF10P002   :  1  
+                                         NR17C2aF10P006   :  1  
+                                         NR17C2aF10P016   :  1  
+                                         (Other)          :170  
+ swelling.index  swelling.power       WAC         Bulk.Density   
+ Min.   :2.037   Min.   :5.701   Min.   :177.0   Min.   :0.6740  
+ 1st Qu.:2.400   1st Qu.:6.875   1st Qu.:487.0   1st Qu.:0.7790  
+ Median :2.600   Median :7.231   Median :513.0   Median :0.8110  
+ Mean   :2.633   Mean   :7.236   Mean   :509.0   Mean   :0.8091  
+ 3rd Qu.:2.800   3rd Qu.:7.625   3rd Qu.:540.2   3rd Qu.:0.8330  
+ Max.   :3.524   Max.   :9.531   Max.   :633.0   Max.   :1.5120  
+                                                                 </code></pre>
+<pre class="r"><code>Umu20  &lt;- droplevels(pyt_functional_1[pyt_functional_1$environment == &quot;Umudike_2020&quot;,])
+Umu21  &lt;- droplevels(pyt_functional_1[pyt_functional_1$environment == &quot;Umudike_2021&quot;,])
+Umu22  &lt;- droplevels(pyt_functional_1[pyt_functional_1$environment == &quot;Umudike_2022&quot;,])
+
+summary(Umu20)</code></pre>
+<pre><code>       environment    location    year                 Genotype 
+ Umudike_2020:31   Umudike:31   2020:31   IITA-TMS-IBA30572: 1  
+                                          NR17C2aF10P002   : 1  
+                                          NR17C2aF10P017   : 1  
+                                          NR17C2aF10P025   : 1  
+                                          NR17C2aF10P036   : 1  
+                                          NR17C2aF114P002  : 1  
+                                          (Other)          :25  
+ swelling.index  swelling.power       WAC         Bulk.Density   
+ Min.   :1.780   Min.   :5.860   Min.   :397.5   Min.   :0.7700  
+ 1st Qu.:2.065   1st Qu.:6.915   1st Qu.:475.0   1st Qu.:0.8100  
+ Median :2.180   Median :7.690   Median :514.5   Median :0.8200  
+ Mean   :2.192   Mean   :7.346   Mean   :504.0   Mean   :0.8319  
+ 3rd Qu.:2.320   3rd Qu.:7.825   3rd Qu.:539.8   3rd Qu.:0.8600  
+ Max.   :2.520   Max.   :8.280   Max.   :607.5   Max.   :0.9400  
+                                                                 </code></pre>
+<pre class="r"><code>summary(Umu21)</code></pre>
+<pre><code>       environment     location     year                Genotype  
+ Umudike_2021:133   Umudike:133   2021:133   NR17C2aF103P001:  1  
+                                             NR17C2aF10P001 :  1  
+                                             NR17C2aF10P002 :  1  
+                                             NR17C2aF10P006 :  1  
+                                             NR17C2aF10P011 :  1  
+                                             NR17C2aF10P016 :  1  
+                                             (Other)        :127  
+ swelling.index  swelling.power        WAC         Bulk.Density   
+ Min.   :1.170   Min.   : 7.012   Min.   :222.0   Min.   :0.6420  
+ 1st Qu.:1.821   1st Qu.: 8.223   1st Qu.:406.8   1st Qu.:0.7575  
+ Median :2.077   Median : 8.852   Median :465.5   Median :0.8100  
+ Mean   :2.095   Mean   : 9.006   Mean   :453.2   Mean   :0.8077  
+ 3rd Qu.:2.304   3rd Qu.: 9.882   3rd Qu.:518.2   3rd Qu.:0.8555  
+ Max.   :3.750   Max.   :11.267   Max.   :620.0   Max.   :1.1210  
+ NA&#39;s   :11      NA&#39;s   :7        NA&#39;s   :13      NA&#39;s   :13      </code></pre>
+<pre class="r"><code>summary(Umu22)</code></pre>
+<pre><code>       environment     location     year                  Genotype  
+ Umudike_2022:157   Umudike:157   2022:157   IITA-TMS-IBA30572:  1  
+                                             NR17C2aF103P001  :  1  
+                                             NR17C2aF10P001   :  1  
+                                             NR17C2aF10P002   :  1  
+                                             NR17C2aF10P006   :  1  
+                                             NR17C2aF10P011   :  1  
+                                             (Other)          :151  
+ swelling.index  swelling.power        WAC       Bulk.Density   
+ Min.   :1.964   Min.   : 5.926   Min.   :218   Min.   :0.5940  
+ 1st Qu.:2.642   1st Qu.: 7.192   1st Qu.:508   1st Qu.:0.7500  
+ Median :2.860   Median : 7.959   Median :549   Median :0.7890  
+ Mean   :2.894   Mean   : 8.057   Mean   :546   Mean   :0.7832  
+ 3rd Qu.:3.095   3rd Qu.: 8.923   3rd Qu.:588   3rd Qu.:0.8220  
+ Max.   :4.000   Max.   :10.309   Max.   :694   Max.   :0.9520  
+                                                                </code></pre>
+<pre class="r"><code>hist(Umu20$Bulk.Density)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/extract%20each%20year%20to%20get%20the%20year%20information-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(Umu21$Bulk.Density)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/extract%20each%20year%20to%20get%20the%20year%20information-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(Umu22$Bulk.Density)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/extract%20each%20year%20to%20get%20the%20year%20information-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(Umu20$Bulk.Density)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/extract%20each%20year%20to%20get%20the%20year%20information-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#dat1 &lt;- droplevels(pyt_functional_1[!is.na(pyt_functional_1$WAC),])
+library(lme4)</code></pre>
+<pre><code>Loading required package: Matrix</code></pre>
+<pre><code>
+Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:tidyr&#39;:
+
+    expand, pack, unpack</code></pre>
+<pre class="r"><code>dim(pyt_functional_1)</code></pre>
+<pre><code>[1] 713   8</code></pre>
+<pre class="r"><code>corr_functional &lt;- cor(pyt_functional_1[,-c(1:4)],  use=&quot;complete.obs&quot;) # correlation
+
+pairs(corr_functional)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/trait%20correlation-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>covar_functional  &lt;- cov(pyt_functional_1[,-c(1:4)], use=&quot;complete.obs&quot;)
+
+write.csv(corr_functional,file=here(&quot;./output/correlation_functional_all_year.csv&quot;)) </code></pre>
+<pre class="r"><code>plot(pyt_functional_1$WAC ~ pyt_functional_1$Bulk.Density)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/scatter%20plots%20for%20the%20covariance%20of%20the%20traits-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(pyt_functional_1$WAC ~ pyt_functional_1$swelling.power)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/scatter%20plots%20for%20the%20covariance%20of%20the%20traits-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(pyt_functional_1[,-c(1:4)])</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/scatter%20plots%20for%20the%20covariance%20of%20the%20traits-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pairs(covar_functional)</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/scatter%20plots%20for%20the%20covariance%20of%20the%20traits-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_wac &lt;- pyt_functional_1$environment
+pyt_functional_1 %&gt;% 
+     ggplot(.,aes(x=WAC, fill=environment))+ geom_density(alpha=0.75)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/plot%20the%20entire%20trials%20at%20the%20same%20time,%20for%20WAC,%20SP,%20SI,%20Bulk%20Density-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_wac</code></pre>
+<pre><code>  [1] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+  [6] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [11] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [16] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [21] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [26] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [31] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [36] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [41] Otobi_2020   Otobi_2020   Umudike_2020 Umudike_2020 Umudike_2020
+ [46] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [51] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [56] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [61] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [66] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [71] Umudike_2020 Umudike_2020 Umudike_2020 Otobi_2021   Otobi_2021  
+ [76] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [81] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [86] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [91] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [96] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[101] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[106] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[111] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[116] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[121] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[126] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[131] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[136] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[141] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[146] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[151] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[156] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[161] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[166] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[171] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[176] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[181] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[186] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[191] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[196] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[201] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[206] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[211] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[216] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[221] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[226] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[231] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[236] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[241] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[246] Otobi_2021   Otobi_2021   Umudike_2021 Umudike_2021 Umudike_2021
+[251] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[256] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[261] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[266] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[271] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[276] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[281] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[286] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[291] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[296] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[301] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[306] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[311] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[316] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[321] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[326] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[331] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[336] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[341] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[346] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[351] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[356] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[361] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[366] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[371] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[376] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[381] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[386] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[391] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[396] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[401] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[406] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[411] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[416] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[421] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[426] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[431] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[436] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[441] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[446] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[451] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[456] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[461] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[466] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[471] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[476] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[481] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[486] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[491] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[496] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[501] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[506] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[511] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[516] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[521] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[526] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[531] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[536] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[541] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[546] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[551] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[556] Otobi_2022   Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[561] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[566] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[571] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[576] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[581] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[586] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[591] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[596] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[601] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[606] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[611] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[616] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[621] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[626] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[631] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[636] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[641] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[646] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[651] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[656] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[661] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[666] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[671] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[676] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[681] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[686] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[691] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[696] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[701] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[706] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[711] Umudike_2022 Umudike_2022 Umudike_2022
+6 Levels: Otobi_2020 Otobi_2021 Otobi_2022 Umudike_2020 ... Umudike_2022</code></pre>
+<pre class="r"><code>plot_BD &lt;-pyt_functional_1$environment
+pyt_functional_1 %&gt;% 
+     ggplot(.,aes(x=Bulk.Density, fill=environment))+ geom_density(alpha=0.75)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/plot%20the%20entire%20trials%20at%20the%20same%20time,%20for%20WAC,%20SP,%20SI,%20Bulk%20Density-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_BD</code></pre>
+<pre><code>  [1] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+  [6] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [11] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [16] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [21] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [26] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [31] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [36] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [41] Otobi_2020   Otobi_2020   Umudike_2020 Umudike_2020 Umudike_2020
+ [46] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [51] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [56] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [61] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [66] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [71] Umudike_2020 Umudike_2020 Umudike_2020 Otobi_2021   Otobi_2021  
+ [76] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [81] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [86] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [91] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [96] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[101] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[106] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[111] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[116] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[121] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[126] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[131] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[136] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[141] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[146] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[151] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[156] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[161] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[166] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[171] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[176] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[181] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[186] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[191] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[196] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[201] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[206] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[211] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[216] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[221] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[226] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[231] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[236] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[241] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[246] Otobi_2021   Otobi_2021   Umudike_2021 Umudike_2021 Umudike_2021
+[251] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[256] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[261] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[266] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[271] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[276] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[281] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[286] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[291] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[296] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[301] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[306] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[311] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[316] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[321] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[326] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[331] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[336] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[341] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[346] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[351] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[356] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[361] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[366] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[371] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[376] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[381] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[386] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[391] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[396] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[401] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[406] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[411] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[416] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[421] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[426] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[431] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[436] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[441] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[446] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[451] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[456] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[461] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[466] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[471] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[476] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[481] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[486] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[491] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[496] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[501] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[506] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[511] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[516] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[521] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[526] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[531] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[536] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[541] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[546] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[551] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[556] Otobi_2022   Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[561] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[566] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[571] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[576] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[581] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[586] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[591] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[596] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[601] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[606] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[611] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[616] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[621] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[626] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[631] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[636] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[641] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[646] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[651] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[656] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[661] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[666] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[671] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[676] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[681] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[686] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[691] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[696] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[701] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[706] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[711] Umudike_2022 Umudike_2022 Umudike_2022
+6 Levels: Otobi_2020 Otobi_2021 Otobi_2022 Umudike_2020 ... Umudike_2022</code></pre>
+<pre class="r"><code>plot_sp &lt;- pyt_functional_1$environment
+pyt_functional_1 %&gt;% 
+     ggplot(.,aes(x=swelling.power, fill=environment))+ geom_density(alpha=0.75)</code></pre>
+<pre><code>Warning: Removed 9 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/plot%20the%20entire%20trials%20at%20the%20same%20time,%20for%20WAC,%20SP,%20SI,%20Bulk%20Density-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_sp</code></pre>
+<pre><code>  [1] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+  [6] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [11] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [16] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [21] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [26] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [31] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [36] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [41] Otobi_2020   Otobi_2020   Umudike_2020 Umudike_2020 Umudike_2020
+ [46] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [51] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [56] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [61] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [66] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [71] Umudike_2020 Umudike_2020 Umudike_2020 Otobi_2021   Otobi_2021  
+ [76] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [81] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [86] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [91] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [96] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[101] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[106] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[111] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[116] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[121] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[126] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[131] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[136] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[141] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[146] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[151] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[156] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[161] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[166] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[171] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[176] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[181] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[186] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[191] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[196] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[201] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[206] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[211] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[216] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[221] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[226] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[231] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[236] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[241] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[246] Otobi_2021   Otobi_2021   Umudike_2021 Umudike_2021 Umudike_2021
+[251] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[256] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[261] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[266] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[271] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[276] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[281] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[286] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[291] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[296] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[301] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[306] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[311] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[316] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[321] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[326] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[331] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[336] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[341] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[346] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[351] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[356] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[361] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[366] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[371] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[376] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[381] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[386] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[391] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[396] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[401] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[406] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[411] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[416] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[421] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[426] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[431] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[436] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[441] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[446] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[451] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[456] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[461] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[466] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[471] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[476] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[481] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[486] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[491] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[496] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[501] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[506] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[511] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[516] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[521] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[526] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[531] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[536] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[541] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[546] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[551] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[556] Otobi_2022   Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[561] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[566] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[571] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[576] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[581] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[586] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[591] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[596] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[601] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[606] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[611] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[616] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[621] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[626] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[631] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[636] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[641] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[646] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[651] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[656] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[661] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[666] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[671] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[676] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[681] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[686] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[691] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[696] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[701] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[706] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[711] Umudike_2022 Umudike_2022 Umudike_2022
+6 Levels: Otobi_2020 Otobi_2021 Otobi_2022 Umudike_2020 ... Umudike_2022</code></pre>
+<pre class="r"><code>plot_si &lt;- pyt_functional_1$environment
+pyt_functional_1 %&gt;% 
+     ggplot(.,aes(x=swelling.index, fill=environment))+ geom_density(alpha=0.75)</code></pre>
+<pre><code>Warning: Removed 13 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/plot%20the%20entire%20trials%20at%20the%20same%20time,%20for%20WAC,%20SP,%20SI,%20Bulk%20Density-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_si</code></pre>
+<pre><code>  [1] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+  [6] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [11] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [16] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [21] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [26] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [31] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [36] Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020   Otobi_2020  
+ [41] Otobi_2020   Otobi_2020   Umudike_2020 Umudike_2020 Umudike_2020
+ [46] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [51] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [56] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [61] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [66] Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020 Umudike_2020
+ [71] Umudike_2020 Umudike_2020 Umudike_2020 Otobi_2021   Otobi_2021  
+ [76] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [81] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [86] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [91] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+ [96] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[101] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[106] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[111] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[116] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[121] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[126] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[131] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[136] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[141] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[146] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[151] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[156] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[161] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[166] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[171] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[176] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[181] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[186] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[191] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[196] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[201] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[206] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[211] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[216] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[221] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[226] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[231] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[236] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[241] Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021   Otobi_2021  
+[246] Otobi_2021   Otobi_2021   Umudike_2021 Umudike_2021 Umudike_2021
+[251] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[256] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[261] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[266] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[271] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[276] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[281] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[286] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[291] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[296] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[301] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[306] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[311] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[316] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[321] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[326] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[331] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[336] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[341] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[346] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[351] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[356] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[361] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[366] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[371] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[376] Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021 Umudike_2021
+[381] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[386] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[391] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[396] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[401] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[406] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[411] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[416] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[421] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[426] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[431] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[436] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[441] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[446] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[451] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[456] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[461] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[466] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[471] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[476] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[481] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[486] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[491] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[496] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[501] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[506] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[511] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[516] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[521] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[526] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[531] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[536] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[541] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[546] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[551] Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022   Otobi_2022  
+[556] Otobi_2022   Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[561] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[566] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[571] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[576] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[581] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[586] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[591] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[596] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[601] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[606] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[611] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[616] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[621] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[626] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[631] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[636] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[641] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[646] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[651] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[656] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[661] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[666] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[671] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[676] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[681] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[686] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[691] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[696] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[701] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[706] Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022 Umudike_2022
+[711] Umudike_2022 Umudike_2022 Umudike_2022
+6 Levels: Otobi_2020 Otobi_2021 Otobi_2022 Umudike_2020 ... Umudike_2022</code></pre>
+<pre class="r"><code>traitname&lt;- (c(&quot;swelling.index&quot;,&quot;swelling.power&quot;, &quot;WAC&quot;, &quot;Bulk.Density&quot;)) # matrix of column names
+
+Result.h2org&lt;- matrix(nrow = 1, ncol = length(traitname))
+colnames(Result.h2org) &lt;- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
+rownames(Result.h2org) &lt;- &quot;H2Comb&quot; # heritability for the combine analysis
+Result.vcomporg = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
+colnames(Result.vcomporg) &lt;- c(&quot;vg&quot;, &quot;vgl&quot;,&quot;vgy&quot;, &quot;vp&quot;,&quot;ve&quot;) # column names for the variance components
+rownames(Result.vcomporg) &lt;- traitname # row names of the variance components
+for(trait in traitname){
+tr = paste0(trait) # the loop will be able to select  and analyse each trait
+Na_g = which(is.na(pyt_functional_1[,tr]))# identify traits with 
+if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
+DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_functional_1 data frame
+}else{
+DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
+}
+ eval(parse(text=paste(&quot;model=lmer(formula = &quot;,trait, &quot; ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = pyt_functional_1)&quot;))) # run the model
+ 
+ss &lt;- summary(model)
+sv &lt;- as.data.frame(ss$varcor) # get the variance component
+gv &lt;- sv[sv$grp==&quot;Genotype&quot;, &quot;vcov&quot;] # genetic variance
+gl &lt;- sv[sv$grp == &quot;Genotype:location&quot; , &quot;vcov&quot;] # genotype by location variance
+gy &lt;- sv[sv$grp == &quot;Genotype:year&quot; , &quot;vcov&quot;] # genotype by year variance
+ve &lt;- sv[sv$grp == &quot;Residual&quot; , &quot;vcov&quot;] # residual variance
+vph &lt;- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
+# make a matrix of the variance output
+H2 &lt;- gv/vph
+Result.vcomporg[trait,1] = gv
+Result.vcomporg[trait,2] = gl
+Result.vcomporg[trait,3] = gy
+Result.vcomporg[trait,4] = ve
+Result.vcomporg[trait,5] = vph
+Result.h2org[,trait] = H2
+}</code></pre>
+<pre><code>boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<pre class="r"><code>Result.vcomporg</code></pre>
+<pre><code>                         vg          vgl          vgy           vp           ve
+swelling.index 1.567734e-09 1.482725e-03 7.754330e-04 9.829710e-02 1.738269e-02
+swelling.power 0.000000e+00 1.075822e-01 2.784366e-02 6.198659e-01 1.663833e-01
+WAC            1.767402e+01 0.000000e+00 4.509386e+02 3.153305e+03 6.935377e+02
+Bulk.Density   2.288989e-04 1.098772e-12 0.000000e+00 3.529053e-03 8.170744e-04</code></pre>
+<pre class="r"><code>Result.h2org</code></pre>
+<pre><code>       swelling.index swelling.power        WAC Bulk.Density
+H2Comb   9.018938e-08              0 0.02548386    0.2801444</code></pre>
+<pre class="r"><code>traitname&lt;- (c(&quot;swelling.index&quot;,&quot;swelling.power&quot;, &quot;WAC&quot;, &quot;Bulk.Density&quot;)) # matrix of column names
+Result.h2 = matrix(nrow = 1, ncol = length(traitname)) # this is how we want the result of the heritability to appear after analysis
+colnames(Result.h2) &lt;- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
+rownames(Result.h2) &lt;- &quot;H2Comb&quot; # heritability for the combine analysis
+Result.vcomp = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
+colnames(Result.vcomp) &lt;- c(&quot;vg&quot;, &quot;vgl&quot;,&quot;vgy&quot;, &quot;vp&quot;,&quot;ve&quot;) # column names for the variance components
+rownames(Result.vcomp) &lt;- traitname # row names of the variance components
+for(trait in traitname){
+tr = paste0(trait)  # the loop will be able to select  and analyse each trait
+Na_g = which(is.na(pyt_functional_1[,tr]))# identify traits with missing data
+if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
+DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_functional_1 data frame
+}else{
+DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
+}
+
+eval(parse(text=paste(&quot;model2=lmer(formula = &quot;,trait, &quot; ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = DatWithout_na )&quot;)))
+RES_trait&lt;- rstudent(model2) # i am using the model that used data without missing data
+outliers&lt;- which(abs(scale(RES_trait))&gt;3) #Remove outlier
+Dat_no_outlier = DatWithout_na[-outliers,] # data frame without outliers
+eval(parse(text=paste(&quot;model=lmer(formula = &quot;,trait, &quot; ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = Dat_no_outlier )&quot;))) # run the model
+ss &lt;- summary(model)
+sv &lt;- as.data.frame(ss$varcor) # get the variance component
+sv
+gv &lt;- sv[sv$grp==&quot;Genotype&quot;, &quot;vcov&quot;] # genetic variance
+gl &lt;- sv[sv$grp == &quot;Genotype:location&quot; , &quot;vcov&quot;] # genotype by location variance
+gy &lt;- sv[sv$grp == &quot;Genotype:year&quot; , &quot;vcov&quot;] # genotype by year variance
+ve &lt;- sv[sv$grp == &quot;Residual&quot; , &quot;vcov&quot;] # residual variance
+vph &lt;- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
+# make a matrix of the variance output
+H2 &lt;- gv/vph
+Result.vcomp[trait,1] = gv
+Result.vcomp[trait,2] = gl
+Result.vcomp[trait,3] = gy
+Result.vcomp[trait,4] = ve
+Result.vcomp[trait,5] = vph
+Result.h2[,trait] = H2
+}</code></pre>
+<pre><code>boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)
+boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<pre class="r"><code>Result.vcomp</code></pre>
+<pre><code>                         vg          vgl          vgy           vp           ve
+swelling.index 0.000000e+00 2.386461e-03 1.650704e-03 9.104713e-02 1.691799e-02
+swelling.power 0.000000e+00 1.032506e-01 2.074215e-02 6.197599e-01 1.618327e-01
+WAC            3.890091e+01 0.000000e+00 4.936136e+02 2.390765e+03 6.018997e+02
+Bulk.Density   2.696187e-04 8.707032e-05 0.000000e+00 2.510019e-03 7.314904e-04</code></pre>
+<pre class="r"><code>Result.h2</code></pre>
+<pre><code>       swelling.index swelling.power        WAC Bulk.Density
+H2Comb              0              0 0.06463023    0.3685882</code></pre>
+<pre class="r"><code>Result.h2 &lt;- data.frame(Result.h2) # making a data frame for the heritability output
+Result.vcomp &lt;- data.frame(Result.vcomp) #making a data frame for the vcomp output
+T_h2 &lt;- t(Result.h2) # transpose the heritability output
+
+df_lmer &lt;- cbind(Result.vcomp, T_h2 ) # bind the two data frame
+df_lmer </code></pre>
+<pre><code>                         vg          vgl          vgy           vp           ve
+swelling.index 0.000000e+00 2.386461e-03 1.650704e-03 9.104713e-02 1.691799e-02
+swelling.power 0.000000e+00 1.032506e-01 2.074215e-02 6.197599e-01 1.618327e-01
+WAC            3.890091e+01 0.000000e+00 4.936136e+02 2.390765e+03 6.018997e+02
+Bulk.Density   2.696187e-04 8.707032e-05 0.000000e+00 2.510019e-03 7.314904e-04
+                   H2Comb
+swelling.index 0.00000000
+swelling.power 0.00000000
+WAC            0.06463023
+Bulk.Density   0.36858818</code></pre>
+<pre class="r"><code>snps_dosage &lt;- read.csv(here::here(&quot;data/snps_199_genotype.csv&quot;), head=T)
+
+genotype_snps &lt;- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
+
+
+write.csv(genotype_snps,file=here(&quot;genotype_snps.csv&quot;)) # Had genotype names in new order (NR17C2aF10P011)</code></pre>
+<pre class="r"><code>snps_geno_name &lt;- read.csv(here::here(&quot;data/genotype_snps.csv&quot;), head=T)  # had genotype names in old order eg (NR17F10C2aP011)
+
+dim(snps_geno_name)</code></pre>
+<pre><code>[1] 198   1</code></pre>
+<pre class="r"><code>#snps_dosage_N &lt;- sub(&#39;IITA.TMS.&#39;,&#39;IITA-TMS-&#39;,geno_snps$X) # To ma sure all the genotypes names are correct . Rewrite the checks
+
+ # combine snps_dosage_N with the dosage file
+
+snps_dosage$X &lt;- snps_geno_name$X # with genotype name in correct order
+colnames(snps_dosage)[1] = &quot;geno_name&quot; # rename column 1 of the snps file
+
+rownames(snps_dosage) &lt;- snps_dosage$geno_name # Naming the row names</code></pre>
+<pre class="r"><code>#removing missing data
+for (j in 1:ncol(snps_dosage)) {
+   snps_dosage[, j] &lt;- ifelse(is.na(snps_dosage[, j]), mean(snps_dosage[, j], na.rm = TRUE), snps_dosage[, 
+        j])
+}
+
+table(rownames(snps_dosage) == pyt_functional_1$Genotype)</code></pre>
+<pre><code>Warning in `==.default`(rownames(snps_dosage), pyt_functional_1$Genotype):
+longer object length is not a multiple of shorter object length</code></pre>
+<pre><code>Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
+shorter object length</code></pre>
+<pre><code>
+FALSE  TRUE 
+  706     7 </code></pre>
+<pre class="r"><code>table(pyt_functional_1$Genotype == rownames(snps_dosage) )</code></pre>
+<pre><code>Warning in `==.default`(pyt_functional_1$Genotype, rownames(snps_dosage)):
+longer object length is not a multiple of shorter object length
+
+Warning in `==.default`(pyt_functional_1$Genotype, rownames(snps_dosage)):
+longer object length is not a multiple of shorter object length</code></pre>
+<pre><code>
+FALSE  TRUE 
+  706     7 </code></pre>
+<pre class="r"><code>snps_dosage1 = snps_dosage[,-1] # remove the column 1 of the snps file
+# new_snp &lt;- cbind(geno_name,snps_dosage) # Combine the new and old order genotype names in one data frame.</code></pre>
+<pre class="r"><code> # character
+library(sommer)</code></pre>
+<pre><code>Loading required package: MASS</code></pre>
+<pre><code>
+Attaching package: &#39;MASS&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:metan&#39;:
+
+    select</code></pre>
+<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+
+    select</code></pre>
+<pre><code>Loading required package: lattice</code></pre>
+<pre><code>Loading required package: crayon</code></pre>
+<pre><code>
+Attaching package: &#39;crayon&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:ggplot2&#39;:
+
+    %+%</code></pre>
+<pre class="r"><code>library(devtools)</code></pre>
+<pre><code>Loading required package: usethis</code></pre>
+<pre class="r"><code>library(rrBLUP)</code></pre>
+<pre><code>
+Attaching package: &#39;rrBLUP&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:sommer&#39;:
+
+    A.mat, GWAS</code></pre>
+<pre class="r"><code>snps_dosage1_Amat &lt;- A.mat(snps_dosage1)
+dim(snps_dosage1_Amat)</code></pre>
+<pre><code>[1] 198 198</code></pre>
+<pre class="r"><code>heatmap(snps_dosage1_Amat) </code></pre>
+<p><img src="figure/Linear_model_garri_quality.Rmd/A.mat%20and%20heatmap%20for%20A.mat-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># gen = which(rownames(snps_dosage) %in%pyt_functional_1$Genotype ) # 
+# Subset the pheno data that has snp data 
+gt = which(pyt_functional_1$Genotype %in% rownames(snps_dosage) ) # identify the row number/genotype name those gentypes from pheno to snps
+
+
+phen1 = droplevels(pyt_functional_1[gt,]) # subset the pheno data that found in the snp data
+
+head(phen1)</code></pre>
+<pre><code>  environment location year          Genotype swelling.index swelling.power
+1  Otobi_2020    Otobi 2020 IITA-TMS-IBA30572          1.910          6.775
+2  Otobi_2020    Otobi 2020   NR17C2aF103P001          2.015          7.240
+3  Otobi_2020    Otobi 2020    NR17C2aF10P002          2.100          6.895
+4  Otobi_2020    Otobi 2020    NR17C2aF10P006          2.200          6.835
+5  Otobi_2020    Otobi 2020    NR17C2aF10P017          2.090          7.475
+6  Otobi_2020    Otobi 2020    NR17C2aF10P025          1.920          7.445
+    WAC Bulk.Density
+1 368.0        0.905
+2 479.0        0.930
+3 550.5        0.920
+4 450.0        0.910
+5 538.0        0.855
+6 392.5        0.830</code></pre>
+<pre class="r"><code>dim(phen1)</code></pre>
+<pre><code>[1] 686   8</code></pre>
+<pre class="r"><code>dim(pyt_functional_1)</code></pre>
+<pre><code>[1] 713   8</code></pre>
+<pre class="r"><code>length(rownames(snps_dosage)) # length row name of the snps</code></pre>
+<pre><code>[1] 198</code></pre>
+<pre class="r"><code>length(levels(as.factor(phen1$Genotype))) # the length of the selected pheno data genotype levels </code></pre>
+<pre><code>[1] 194</code></pre>
+<pre class="r"><code># if the legnths are equal no need subseting the snp data
+# but if the length is different we should subset the snp data in relation to the selected pheno genotypes 
+
+gsnp = which(rownames(snps_dosage) %in% levels(phen1$Genotype)) 
+
+snp2 = snps_dosage[rownames(snps_dosage)[gsnp],] # subset the snps based on the genotypes with snp and also phenotype
+dim(snp2)</code></pre>
+<pre><code>[1]   194 16384</code></pre>
+<pre class="r"><code>length(levels(phen1$Genotype))</code></pre>
+<pre><code>[1] 194</code></pre>
+<pre class="r"><code>Geno_present &lt;- rownames(snp2) %in% levels(phen1$Genotype)</code></pre>
+<pre class="r"><code>library(sommer)
+A &lt;- A.mat(snp2[,-1])
+
+
+mix_wac &lt;- mmer(WAC~ year + location+ year:location, 
+             random=~vsr(Genotype, Gu=A) + Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)</code></pre>
+<pre><code>iteration    LogLik     wall    cpu(sec)   restrained
+    1      -161.236   13:55:30      1           0
+    2      -153.994   13:55:31      2           1
+    3      -151.697   13:55:32      3           1
+    4      -151.689   13:55:33      4           1
+    5      -151.689   13:55:33      4           1</code></pre>
+<pre class="r"><code>summary(mix_wac)$varcomp</code></pre>
+<pre><code>                            VarComp VarCompSE   Zratio Constraint
+u:Genotype.WAC-WAC         138.4164  118.1495 1.171537   Positive
+Genotype:year.WAC-WAC      389.5117  229.1462 1.699839   Positive
+Genotype:location.WAC-WAC    0.0000  189.9436 0.000000   Positive
+units.WAC-WAC             3134.2570  326.4680 9.600503   Positive</code></pre>
+<pre class="r"><code>vpredict(mix_wac, h1 ~ V1/(V1+ (V2/3)+ (V3/2)+(V4/6)) ) # heritability for WAC</code></pre>
+<pre><code>    Estimate        SE
+h1 0.1750711 0.1303156</code></pre>
+<pre class="r"><code>#Bulk density
+mix_BD &lt;- mmer(Bulk.Density~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)</code></pre>
+<pre><code>iteration    LogLik     wall    cpu(sec)   restrained
+    1      -190.785   13:55:35      1           0
+    2      -184.425   13:55:36      2           1
+    3      -182.416   13:55:36      2           1
+    4      -182.317   13:55:37      3           1
+    5      -182.316   13:55:38      4           1
+    6      -182.316   13:55:39      5           1</code></pre>
+<pre class="r"><code>summary(mix_BD)$varcomp</code></pre>
+<pre><code>                                                 VarComp    VarCompSE    Zratio
+u:Genotype.Bulk.Density-Bulk.Density        6.430174e-05 7.387263e-05 0.8704406
+Genotype:year.Bulk.Density-Bulk.Density     0.000000e+00 1.750670e-04 0.0000000
+Genotype:location.Bulk.Density-Bulk.Density 2.650356e-04 1.566157e-04 1.6922677
+units.Bulk.Density-Bulk.Density             2.504546e-03 2.605459e-04 9.6126866
+                                            Constraint
+u:Genotype.Bulk.Density-Bulk.Density          Positive
+Genotype:year.Bulk.Density-Bulk.Density       Positive
+Genotype:location.Bulk.Density-Bulk.Density   Positive
+units.Bulk.Density-Bulk.Density               Positive</code></pre>
+<pre class="r"><code>vpredict(mix_BD, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))</code></pre>
+<pre><code>    Estimate        SE
+h1 0.1046844 0.1116891</code></pre>
+<pre class="r"><code>#swelling index
+mix_si &lt;- mmer(swelling.index~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)</code></pre>
+<pre><code>iteration    LogLik     wall    cpu(sec)   restrained
+    1      -80.5152   13:55:40      1           0
+    2      -73.6939   13:55:41      2           0
+    3      -71.0561   13:55:42      3           1
+    4      -70.7489   13:55:42      3           1
+    5      -70.7416   13:55:43      4           1
+    6      -70.7414   13:55:44      5           1</code></pre>
+<pre class="r"><code>summary(mix_si)$varcomp</code></pre>
+<pre><code>                                                     VarComp   VarCompSE
+u:Genotype.swelling.index-swelling.index        0.0038187790 0.003167205
+Genotype:year.swelling.index-swelling.index     0.0000000000 0.006365287
+Genotype:location.swelling.index-swelling.index 0.0003246319 0.005438053
+units.swelling.index-swelling.index             0.0980281276 0.009824289
+                                                    Zratio Constraint
+u:Genotype.swelling.index-swelling.index        1.20572513   Positive
+Genotype:year.swelling.index-swelling.index     0.00000000   Positive
+Genotype:location.swelling.index-swelling.index 0.05969634   Positive
+units.swelling.index-swelling.index             9.97813947   Positive</code></pre>
+<pre class="r"><code>vpredict(mix_si, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))</code></pre>
+<pre><code>    Estimate        SE
+h1 0.1879402 0.1351142</code></pre>
+<pre class="r"><code>mix_sp &lt;- mmer(swelling.power~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)</code></pre>
+<pre><code>iteration    LogLik     wall    cpu(sec)   restrained
+    1      -189.18   13:55:45      0           0
+    2      -184.553   13:55:46      1           0
+    3      -183.159   13:55:47      2           0
+    4      -183.056   13:55:48      3           0
+    5      -183.048   13:55:49      4           0
+    6      -183.047   13:55:49      4           0</code></pre>
+<pre class="r"><code>summary(mix_sp)$varcomp</code></pre>
+<pre><code>                                                    VarComp  VarCompSE
+u:Genotype.swelling.power-swelling.power        0.022371372 0.02238911
+Genotype:year.swelling.power-swelling.power     0.009494119 0.04593350
+Genotype:location.swelling.power-swelling.power 0.085844927 0.04207708
+units.swelling.power-swelling.power             0.643307105 0.06736999
+                                                   Zratio Constraint
+u:Genotype.swelling.power-swelling.power        0.9992078   Positive
+Genotype:year.swelling.power-swelling.power     0.2066927   Positive
+Genotype:location.swelling.power-swelling.power 2.0401826   Positive
+units.swelling.power-swelling.power             9.5488679   Positive</code></pre>
+<pre class="r"><code>vpredict(mix_sp, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))</code></pre>
+<pre><code>    Estimate        SE
+h1 0.1273442 0.1159706</code></pre>
+<pre class="r"><code>traitnames&lt;- (c(&quot;swelling.index&quot;,&quot;swelling.power&quot;, &quot;WAC&quot;, &quot;Bulk.Density&quot;))
+library(sommer)
+h2c = tibble() # an empty table that will contain the heritability for all the traits
+vcomp = tibble() # an empty table that will contains the variance components
+names(vcomp) = c(&quot;vg&quot;,&quot;vgl&quot;,&quot;vgy&quot;,&quot;vp&quot;,&quot;ve&quot;)</code></pre>
+<pre><code>Warning: The `value` argument of `names&lt;-` must have the same length as `x` as of tibble
+3.0.0.
+ℹ `names` must have length 0, not 5.</code></pre>
+<pre class="r"><code># h2c = as.data.frame(h2c)
+# rownames(h2c) = traitnames
+# h2c = tibble(h2c)
+for(traits in traitnames){
+ trs = paste0(traits)# the loop will be able to select  and analyse each trait
+eval(parse(text=paste(&quot;model1= mmer(&quot;,traits,&quot;~ year + location + year:location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+             rcov=~units,
+             data=phen1)&quot;)))
+
+ss = summary(model1)
+ss = data.frame(ss$varcomp)
+vg = ss[1,&quot;VarComp&quot;] # assigning names to the variance component in column 1
+vgy = ss[2,&quot;VarComp&quot;]
+vgl = ss[3,&quot;VarComp&quot;]
+ve = ss[4,&quot;VarComp&quot;]
+vp =  vg + vgl/2 + vgy/3  + ve/6 
+tt = cbind(vg,vgl, vgy, vp, ve)
+
+rownames(tt) = paste(traits) # This will calculate the heritability of each of the traits
+
+vcomp = rbind(vcomp,tt) # this bind the variance components to the functional properties
+
+name = paste0(traits)
+h2 = vpredict(model1, ~ V1/(V1 + (V2/3) + (V3/2)+(V4/6)) )
+h2 = as.data.frame(h2)
+rownames(h2) = paste0(traits)
+h2c = rbind(h2c,h2)
+
+}</code></pre>
+<pre><code>iteration    LogLik     wall    cpu(sec)   restrained
+    1      -80.5152   13:55:51      1           0
+    2      -73.6939   13:55:52      2           0
+    3      -71.0561   13:55:53      3           1
+    4      -70.7489   13:55:53      3           1
+    5      -70.7416   13:55:54      4           1
+    6      -70.7414   13:55:55      5           1
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -189.18   13:55:56      1           0
+    2      -184.553   13:55:57      2           0
+    3      -183.159   13:55:58      3           0
+    4      -183.056   13:55:59      4           0
+    5      -183.048   13:55:59      4           0
+    6      -183.047   13:56:0      5           0
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -161.236   13:56:2      1           0
+    2      -153.994   13:56:3      2           1
+    3      -151.697   13:56:3      2           1
+    4      -151.689   13:56:4      3           1
+    5      -151.689   13:56:5      4           1
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -190.785   13:56:6      0           0
+    2      -184.425   13:56:7      1           1
+    3      -182.416   13:56:8      2           1
+    4      -182.317   13:56:9      3           1
+    5      -182.316   13:56:9      3           1
+    6      -182.316   13:56:10      4           1</code></pre>
+<pre class="r"><code>vcomp</code></pre>
+<pre><code>                         vg          vgl          vgy           vp           ve
+swelling.index 3.818779e-03 0.0003246319 0.000000e+00 2.031912e-02 9.802813e-02
+swelling.power 2.237137e-02 0.0858449272 9.494119e-03 1.756764e-01 6.433071e-01
+WAC            1.384164e+02 0.0000000000 3.895117e+02 7.906299e+02 3.134257e+03
+Bulk.Density   6.430174e-05 0.0002650356 0.000000e+00 6.142438e-04 2.504546e-03</code></pre>
+<pre class="r"><code>h2c </code></pre>
+<pre><code>                Estimate        SE
+swelling.index 0.1879402 0.1351142
+swelling.power 0.1273442 0.1159706
+WAC            0.1750711 0.1303156
+Bulk.Density   0.1046844 0.1116891</code></pre>
+<pre class="r"><code>df_mmer &lt;- cbind(vcomp,h2c) # binding the mmer variance components with heritability
+df_mmer &lt;- data.frame(df_mmer) #converting to a data frame
+colnames(df_mmer)[6] &lt;- &quot;h2&quot; # rename Estimates to h2
+colnames(df_mmer)[7] &lt;- &quot;SE h2&quot;
+View(df_mmer)
+df_mmer</code></pre>
+<pre><code>                         vg          vgl          vgy           vp           ve
+swelling.index 3.818779e-03 0.0003246319 0.000000e+00 2.031912e-02 9.802813e-02
+swelling.power 2.237137e-02 0.0858449272 9.494119e-03 1.756764e-01 6.433071e-01
+WAC            1.384164e+02 0.0000000000 3.895117e+02 7.906299e+02 3.134257e+03
+Bulk.Density   6.430174e-05 0.0002650356 0.000000e+00 6.142438e-04 2.504546e-03
+                      h2     SE h2
+swelling.index 0.1879402 0.1351142
+swelling.power 0.1273442 0.1159706
+WAC            0.1750711 0.1303156
+Bulk.Density   0.1046844 0.1116891</code></pre>
+<pre class="r"><code>df_lmer &lt;- cbind(Result.vcomp, T_h2 ) # bind the two data frames
+
+colnames(df_mmer)[6] = &quot;H2Comb&quot;
+df_mmer1 = df_mmer[,-7]
+rownames(df_mmer1) &lt;- c(&quot;swelling.index_mmer&quot;, &quot;swelling.power_mmer&quot;, &quot;WAC_mmer&quot;, &quot;Bulk.Density_mmer&quot;)
+rownames(df_lmer) &lt;- c(&quot;swelling.index_lmer&quot;, &quot;swelling.power_lmer&quot;, &quot;WAC_lmer&quot;, &quot;Bulk.Density_lmer&quot;)
+
+lmer_mmer &lt;- rbind(df_lmer, df_mmer1) # bind the two data frames
+
+lmer_mmer</code></pre>
+<pre><code>                              vg          vgl          vgy           vp
+swelling.index_lmer 0.000000e+00 2.386461e-03 1.650704e-03 9.104713e-02
+swelling.power_lmer 0.000000e+00 1.032506e-01 2.074215e-02 6.197599e-01
+WAC_lmer            3.890091e+01 0.000000e+00 4.936136e+02 2.390765e+03
+Bulk.Density_lmer   2.696187e-04 8.707032e-05 0.000000e+00 2.510019e-03
+swelling.index_mmer 3.818779e-03 3.246319e-04 0.000000e+00 2.031912e-02
+swelling.power_mmer 2.237137e-02 8.584493e-02 9.494119e-03 1.756764e-01
+WAC_mmer            1.384164e+02 0.000000e+00 3.895117e+02 7.906299e+02
+Bulk.Density_mmer   6.430174e-05 2.650356e-04 0.000000e+00 6.142438e-04
+                              ve     H2Comb
+swelling.index_lmer 1.691799e-02 0.00000000
+swelling.power_lmer 1.618327e-01 0.00000000
+WAC_lmer            6.018997e+02 0.06463023
+Bulk.Density_lmer   7.314904e-04 0.36858818
+swelling.index_mmer 9.802813e-02 0.18794021
+swelling.power_mmer 6.433071e-01 0.12734421
+WAC_mmer            3.134257e+03 0.17507111
+Bulk.Density_mmer   2.504546e-03 0.10468438</code></pre>
+<pre class="r"><code>lmer_mmer_sort &lt;- lmer_mmer[sort(rownames(lmer_mmer)),] # sort the lmer_mmer data frame according to the rownames
+lmer_mmer_sort</code></pre>
+<pre><code>                              vg          vgl          vgy           vp
+Bulk.Density_lmer   2.696187e-04 8.707032e-05 0.000000e+00 2.510019e-03
+Bulk.Density_mmer   6.430174e-05 2.650356e-04 0.000000e+00 6.142438e-04
+swelling.index_lmer 0.000000e+00 2.386461e-03 1.650704e-03 9.104713e-02
+swelling.index_mmer 3.818779e-03 3.246319e-04 0.000000e+00 2.031912e-02
+swelling.power_lmer 0.000000e+00 1.032506e-01 2.074215e-02 6.197599e-01
+swelling.power_mmer 2.237137e-02 8.584493e-02 9.494119e-03 1.756764e-01
+WAC_lmer            3.890091e+01 0.000000e+00 4.936136e+02 2.390765e+03
+WAC_mmer            1.384164e+02 0.000000e+00 3.895117e+02 7.906299e+02
+                              ve     H2Comb
+Bulk.Density_lmer   7.314904e-04 0.36858818
+Bulk.Density_mmer   2.504546e-03 0.10468438
+swelling.index_lmer 1.691799e-02 0.00000000
+swelling.index_mmer 9.802813e-02 0.18794021
+swelling.power_lmer 1.618327e-01 0.00000000
+swelling.power_mmer 6.433071e-01 0.12734421
+WAC_lmer            6.018997e+02 0.06463023
+WAC_mmer            3.134257e+03 0.17507111</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.1 (2022-06-23)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur ... 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] rrBLUP_4.6.2    devtools_2.4.5  usethis_2.1.6   sommer_4.2.0.1 
+ [5] crayon_1.5.2    lattice_0.20-45 MASS_7.3-57     lme4_1.1-31    
+ [9] Matrix_1.5-3    metan_1.17.0    forcats_1.0.0   stringr_1.5.0  
+[13] dplyr_1.1.0     purrr_1.0.1     readr_2.1.4     tidyr_1.3.0    
+[17] tibble_3.1.8    ggplot2_3.4.1   tidyverse_1.3.2 here_1.0.1     
+[21] workflowr_1.7.0
+
+loaded via a namespace (and not attached):
+  [1] googledrive_2.0.0   minqa_1.2.5         colorspace_2.1-0   
+  [4] ellipsis_0.3.2      rprojroot_2.0.3     fs_1.6.1           
+  [7] rstudioapi_0.14     farver_2.1.1        remotes_2.4.2      
+ [10] ggrepel_0.9.3       fansi_1.0.4         lubridate_1.9.2    
+ [13] mathjaxr_1.6-0      xml2_1.3.3          splines_4.2.1      
+ [16] cachem_1.0.6        knitr_1.42          pkgload_1.3.2      
+ [19] polyclip_1.10-4     jsonlite_1.8.4      nloptr_2.0.3       
+ [22] broom_1.0.3         dbplyr_2.3.0        ggforce_0.4.1      
+ [25] shiny_1.7.4         compiler_4.2.1      httr_1.4.4         
+ [28] backports_1.4.1     assertthat_0.2.1    fastmap_1.1.0      
+ [31] gargle_1.3.0        cli_3.6.0           later_1.3.0        
+ [34] tweenr_2.0.2        prettyunits_1.1.1   htmltools_0.5.4    
+ [37] tools_4.2.1         lmerTest_3.1-3      gtable_0.3.1       
+ [40] glue_1.6.2          Rcpp_1.0.10         cellranger_1.1.0   
+ [43] jquerylib_0.1.4     vctrs_0.5.2         nlme_3.1-157       
+ [46] xfun_0.37           ps_1.7.2            rvest_1.0.3        
+ [49] timechange_0.2.0    mime_0.12           miniUI_0.1.1.1     
+ [52] lifecycle_1.0.3     googlesheets4_1.0.1 getPass_0.2-2      
+ [55] scales_1.2.1        hms_1.1.2           promises_1.2.0.1   
+ [58] parallel_4.2.1      RColorBrewer_1.1-3  yaml_2.3.7         
+ [61] memoise_2.0.1       sass_0.4.5          reshape_0.8.9      
+ [64] stringi_1.7.12      highr_0.10          pkgbuild_1.4.0     
+ [67] boot_1.3-28         rlang_1.0.6         pkgconfig_2.0.3    
+ [70] evaluate_0.20       htmlwidgets_1.6.1   patchwork_1.1.2    
+ [73] labeling_0.4.2      processx_3.8.0      tidyselect_1.2.0   
+ [76] GGally_2.1.2        plyr_1.8.8          magrittr_2.0.3     
+ [79] R6_2.5.1            profvis_0.3.7       generics_0.1.3     
+ [82] DBI_1.1.3           pillar_1.8.1        haven_2.5.1        
+ [85] whisker_0.4.1       withr_2.5.0         modelr_0.1.10      
+ [88] utf8_1.2.3          urlchecker_1.0.1    tzdb_0.3.0         
+ [91] rmarkdown_2.20      grid_4.2.1          readxl_1.4.2       
+ [94] callr_3.7.3         git2r_0.31.0        reprex_2.0.2       
+ [97] digest_0.6.31       xtable_1.8-4        httpuv_1.6.8       
+[100] numDeriv_2016.8-1.1 munsell_0.5.0       bslib_0.4.2        
+[103] sessioninfo_1.2.2  </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
