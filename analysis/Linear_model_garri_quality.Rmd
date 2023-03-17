@@ -88,9 +88,9 @@ Oto_22_func <- Oto_22_func %>%
 library(tidyverse)
 Umu_22_func <-Umu_22_func %>%
   add_column(location = "Umudike", year="2022") # add column with location and year for Umudike
-head(Umu_22_func)
+
 Umu_22_func <- subset(Umu_22_func, select=-c(sn)) # Remove the sn
-head(Umu_22_func)
+
 Umu_22_func <- Umu_22_func %>% relocate(location, year) # change the position of the location and year
 
 Oto_22_func <- Oto_22_func %>%
@@ -102,12 +102,11 @@ Oto_22_func <- Oto_22_func %>%
 ```{r joining the two data frames}
 Umu_oto_22 <- rbind(Oto_22_func, y=Umu_22_func)
 
-str(Umu_oto_22)
+
 Umu_oto_22$location <- as.factor(Umu_oto_22$location)
 Umu_oto_22$year <- as.factor(Umu_oto_22$year)
-str(Umu_oto_22)
-glimpse(Umu_oto_22)
-summary(Umu_oto_22)
+
+
 plot(Umu_oto_22)
 colnames(Umu_oto_22)
 ```
@@ -117,9 +116,6 @@ colnames(Umu_oto_22)
 Oto_19 <- read.csv(here::here("data", "functional-otobi2019_2020.csv"), head=T)
 
 Umu_19 <- read.csv(here::here("data", "Umu_func_pyt2019_2020.csv"), head=T)
-
-str(Oto_19)
-str(Umu_19)
 
 colnames(Oto_19)
 colnames(Umu_19)
@@ -148,7 +144,7 @@ Oto_19 <- Oto_19 %>%
 colnames(Oto_19)
 colnames(Umu_19)
 dim(Oto_19)
-str(Oto_19)
+
 dim(Umu_19)
 
 
@@ -199,7 +195,7 @@ Umu_21 <- read.csv(here::here("data", "Umu_2020_2021_PYT_Functional.csv"), head=
 
 Oto_21 <- read.csv(here::here("data", "OTOBI_2020_2021_PYT_Functional.csv"), head=T)
 
-str(Umu_21)
+
 dim(Umu_21)
 Umu_21$Genotypes <- as.factor(Umu_21$Genotypes)
 Umu_21 <- Umu_21 %>% 
@@ -247,7 +243,7 @@ unite( 'environment', location:year, sep= "_", remove = FALSE) # concantenating 
 ```
 
 
-```{r editing genotype names in pyt_functional_1$Genotype to match with snp$X and uSIng metan package to change multiple column as factor}
+```{r editing genotype names in pyt_functional_1$Genotype to match with snp$X and using metan package to change multiple column as factor}
 
 head(pyt_functional_1)
 
@@ -506,9 +502,9 @@ df_lmer
 ```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
 
 snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
-str(snps_dosage)
+
 genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
-head(snps_dosage[1:10,1:10])
+
 
 write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
 
@@ -524,7 +520,7 @@ dim(snps_geno_name)
 
 snps_dosage$X <- snps_geno_name$X # with genotype name in correct order
 colnames(snps_dosage)[1] = "geno_name" # rename column 1 of the snps file
-snps_dosage[1:10, 1:20]
+
 rownames(snps_dosage) <- snps_dosage$geno_name # Naming the row names
 ```
 
@@ -571,7 +567,7 @@ length(levels(as.factor(phen1$Genotype))) # the length of the selected pheno dat
 # but if the length is different we should subset the snp data in relation to the selected pheno genotypes 
 
 gsnp = which(rownames(snps_dosage) %in% levels(phen1$Genotype)) 
-head(snps_dosage[,1:20])
+
 snp2 = snps_dosage[rownames(snps_dosage)[gsnp],] # subset the snps based on the genotypes with snp and also phenotype
 dim(snp2)
 length(levels(phen1$Genotype))
@@ -582,10 +578,7 @@ Geno_present <- rownames(snp2) %in% levels(phen1$Genotype)
 ```{r A matrix and the mixed model with the new genotype GA data }
 library(sommer)
 A <- A.mat(snp2[,-1])
-str(snp2)
-head(snp2)
 
-dim
 
 mix_wac <- mmer(WAC~ year + location+ year:location, 
              random=~vsr(Genotype, Gu=A) + Genotype:year + Genotype:location,
