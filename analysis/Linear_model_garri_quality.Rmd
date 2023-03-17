@@ -679,16 +679,19 @@ df_mmer
 
 
 ```{r creating tables}
-df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frame
+df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frames
 
 colnames(df_mmer)[6] = "H2Comb"
 df_mmer1 = df_mmer[,-7]
 rownames(df_mmer1) <- c("swelling.index_mmer", "swelling.power_mmer", "WAC_mmer", "Bulk.Density_mmer")
 rownames(df_lmer) <- c("swelling.index_lmer", "swelling.power_lmer", "WAC_lmer", "Bulk.Density_lmer")
 
-lmer_mmer <- rbind(df_lmer, df_mmer1) # bind the two data frame
+lmer_mmer <- rbind(df_lmer, df_mmer1) # bind the two data frames
 
 lmer_mmer
+
+lmer_mmer_sort <- lmer_mmer[sort(rownames(lmer_mmer)),] # sort the lmer_mmer data frame according to the rownames
+lmer_mmer_sort
 ```
 
 
