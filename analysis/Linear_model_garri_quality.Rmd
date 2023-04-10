@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r Check that I have the packages}
-packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP")
+packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR")
 ip <- installed.packages()
 all_packages_installed <- TRUE
 for (package in packages_used){
@@ -100,7 +100,7 @@ Oto_22_func <- Oto_22_func %>%
 
 
 ```{r joining the two data frames}
-Umu_oto_22 <- rbind(Oto_22_func, y=Umu_22_func)
+Umu_oto_22 <- rbind(Oto_22_func, Umu_22_func)
 
 
 Umu_oto_22$location <- as.factor(Umu_oto_22$location)
@@ -357,6 +357,11 @@ dim(pyt_functional_1)
 
 ```
 
+```{r}
+All_AMYL <-  read.csv(here::here("data/PYT_chemical_data/All_years_amylose.csv"), head=T)
+
+```
+
 ```{r, trait correlation}
 corr_functional <- cor(pyt_functional_1[,-c(1:4)],  use="complete.obs") # correlation
 
@@ -503,8 +508,22 @@ df_lmer
 
 snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
 
-genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
+dim(snps_dosage)
+library(rrBLUP)
+library(sommer)
+head(snps_dosage[,1:15])
+snps_dosage1 <- (snps_dosage[,-1])
+head(snps_dosage1[1:5,1:5])  
 
+mt = rrBLUP::A.mat(snps_dosage1)
+heatmap(mt)
+
+
+install.packages("FactoMineR")
+library(FactoMineR)
+PCA(mt)
+
+genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
 
 write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
 
@@ -535,19 +554,10 @@ table(rownames(snps_dosage) == pyt_functional_1$Genotype)
 
 table(pyt_functional_1$Genotype == rownames(snps_dosage) )
 
-snps_dosage1 = snps_dosage[,-1] # remove the column 1 of the snps file
+#snps_dosage1 = snps_dosage[,-1] # remove the column 1 of the snps file
 # new_snp <- cbind(geno_name,snps_dosage) # Combine the new and old order genotype names in one data frame.
 ```
-
-```{r A.mat and heatmap for A.mat}
- # character
-library(sommer)
-library(devtools)
-library(rrBLUP)
-snps_dosage1_Amat <- A.mat(snps_dosage1)
-dim(snps_dosage1_Amat)
-heatmap(snps_dosage1_Amat) 
-```
+`
 
 ```{r, looking for snps that are not in the phenotype data}
 # gen = which(rownames(snps_dosage) %in%pyt_functional_1$Genotype ) # 
@@ -575,11 +585,15 @@ Geno_present <- rownames(snp2) %in% levels(phen1$Genotype)
 
 ```
 
-```{r A matrix and the mixed model with the new genotype GA data }
+```{r A matrix  }
 library(sommer)
-A <- A.mat(snp2[,-1])
+A <- rrBLUP::A.mat(snp2[,-1])
+heatmap(A)# heatmap for genotypes present in 194 genotypes
 
 
+```
+
+```{r  mixed model with the new genotype GA data}
 mix_wac <- mmer(WAC~ year + location+ year:location, 
              random=~vsr(Genotype, Gu=A) + Genotype:year + Genotype:location,
              rcov=~units,
@@ -629,7 +643,7 @@ names(vcomp) = c("vg","vgl","vgy","vp","ve")
 # rownames(h2c) = traitnames
 # h2c = tibble(h2c)
 for(traits in traitnames){
- trs = paste0(traits)# the loop will be able to select  and analyse each trait
+ trs = paste0(traits) # the loop will be able to select  and analyse each trait
 eval(parse(text=paste("model1= mmer(",traits,"~ year + location + year:location,
              random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
              rcov=~units,
@@ -686,5 +700,36 @@ lmer_mmer
 lmer_mmer_sort <- lmer_mmer[sort(rownames(lmer_mmer)),] # sort the lmer_mmer data frame according to the rownames
 lmer_mmer_sort
 ```
+```{r merging the functional data with the chemical data}
+All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv"))
+
+dim(All_chem)
+pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
+pyt_functional <- pyt_functional %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
+All_chem <- All_chem %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
+
+All_chem <- All_chem %>% dplyr::mutate(Year_n=as.factor(Year)) %>% dplyr::select(-Year) %>% rename(Year=Year_n)
+chem_func <- dplyr::full_join(pyt_functional, All_chem, by=c("Location", "Year", "Genotype"))
+# chem_func <- merge(pyt_functional, All_chem, all.x=FALSE)
+
+dim(pyt_functional)
+dim(All_chem)
+dim(chem_func)
+str(chem_func)
+chem_func$Location <-as.factor(chem_func$Location)
+
+chem_func$Genotype <-as.factor(chem_func$Genotype)
+chem_func1 <- chem_func %>% dplyr::select(c("swelling.index","swelling.power","WAC","Bulk.Density","Amylose","Crude.Fiber"))
+```
+
+```{r correlation plot of the chem_func data frame}
+head(chem_func1)
+corr <- cor(chem_func1,use = "pairwise.complete.obs")
+library(corrplot)
+cor_chem_func <- corrplot(corr, method = "circle",type = "full",is.corr = TRUE)
+ df2 <- df %>% select(-c(id, name, chapters))   corrplot(corr, order = 'alphabet', addCoef.col = 'black') 
+ 
+```
+
 
 

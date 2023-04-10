@@ -5,25 +5,77 @@ date: "2023-03-17"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP")
+ip <- installed.packages()
+all_packages_installed <- TRUE
+for (package in packages_used){
+  if (!(package %in% ip[,"Package"])){
+    print(paste("Please install package", package))
+    all_packages_installed <- FALSE
+  }
+}#END packages_used
+if (!all_packages_installed) stop("Need to install packages")
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r Use here package}
+require(here)
+here::i_am("analysis/PYT_Chemical_Analysis.Rmd")
+library(tidyverse)
 ```
 
-## Including Plots
+```{r read in the data}
+Umu_oto_Amyl_20<- read.csv(here::here("data/PYT_chemical_data", "Otobi_umudike_2020.csv"), head=T)
+head(Umu_oto_Amyl_20)
+summary(Umu_oto_Amyl_20)
 
-You can also embed plots, for example:
+Oto_21 <- read.csv(here::here("data/PYT_chemical_data", "Otobi_garri_amylose_2021.csv"), head=T)
+str(Oto_21)
+summary(Oto_21)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Oto_22 <- read.csv(here::here("data/PYT_chemical_data", "Otobi_garri_amylose_2022.csv"), head=T)
+head(Oto_22)
+summary(Oto_22)
+
+Umu_21 <- read.csv(here::here("data/PYT_chemical_data", "Umudike_garri_pyt_2021.csv"), head=T)
+View(Umu_21)
+summary(Umu_21)
+
+Umu_22 <- read.csv(here::here("data/PYT_chemical_data", "Umudike_garri_amylose_2022.csv"), head=T)
+head(Umu_22)
+summary(Umu_22)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r work on Umu_oto data to be same form with the rest of the data}
+#Umu_oto_Amyl_20 <- Umu_oto_Amyl_20 %>% relocate(Year, Location) # change the order of the year and the location
+
+#Umu_oto_Amyl_20<- Umu_oto_Amyl_20 %>% 
+       #rename(Amylose= AMYLOSE) 
+```
+
+
+```{r binding the All the data}
+All_amyl<-rbind(Umu_oto_Amyl_20,Oto_21,Oto_22,Umu_21,Umu_22)
+dim(All_amyl)
+str(All_amyl)
+All_amyl$Year<-as.factor(All_amyl$Year)
+All_amyl$Location<-as.factor(All_amyl$Location)
+All_amyl$Genotype<-as.factor(All_amyl$Genotype)
+
+```
+
+```{r}
+write.csv(x = All_amyl, file = "data/PYT_chemical_data/All_years_chem.csv")
+
+All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv"))
+head(All_AMYL)
+All_AMYL<- All_AMYL %>% 
+     rename(year=Year, location=Location) 
+All_AMYL=All_AMYL[-1]
+
+All_AMYL$year<-as.factor(All_AMYL$year)
+All_AMYL$location<-as.factor(All_AMYL$location)
+All_AMYL$Genotype<-as.factor(All_AMYL$Genotype)
+str(All_AMYL)
+summary(All_AMYL)
+```
+
