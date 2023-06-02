@@ -79,3 +79,11 @@ str(All_AMYL)
 summary(All_AMYL)
 ```
 
+```{r looking for genotypes in snp_dosage that are in chem_func}
+
+geno = which(chem_func$Genotype %in% rownames(snps_dosage) ) # identify the row number/genotype name those genotypes from pheno to snps
+dim(geno)
+```
+
+
+

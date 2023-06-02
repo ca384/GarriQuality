@@ -10,16 +10,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r Check that I have the packages}
-packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR")
+packages_used <- c("tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR","corrplot")
 ip <- installed.packages()
 all_packages_installed <- TRUE
 for (package in packages_used){
   if (!(package %in% ip[,"Package"])){
     print(paste("Please install package", package))
     all_packages_installed <- FALSE
-  }
+  } else {
+    library(package,
+  character.only = T) # load required package
+  } # end else statement
 }#END packages_used
 if (!all_packages_installed) stop("Need to install packages")
+
 ```
 
 ```{r Use here package}
@@ -28,7 +32,6 @@ here::i_am("analysis/Linear_model_garri_quality.Rmd")
 ```
 
 ```{r Pull in the data}
-library(tidyverse)
 Oto_22_func <- read.csv(here::here("data", "OTOBI_2022PYT_FUNCTIONAL.csv"), head=T)
 
 # Oto_22_func<-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/OTOBI_2022PYT_FUNCTIONAL.csv", head=T) # data for Otobi wit swelling power, swelling indx, bulk denSIty and water absorbing capacity for 2022
@@ -53,9 +56,9 @@ boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri OTO",ylab = "
 
 boxplot(Umu_22_func$wac. , main="Water absorbing capacity of garri UMU",ylab="WAC", xlab="Genotypes") #Removing outliers using the boxplot method
 
-library(ggplot2)
 
-par(mfrow=c(2,2))
+
+
 boxplot(Oto_22_func$swelling.index, xlab="Genotypes", ylab="SI")
 boxplot(Oto_22_func$swelling.power, ylab="SP",xlab="Genotypes")
 boxplot(Oto_22_func$wac.,ylab="WAC", xlab="Genotypes")
@@ -66,7 +69,7 @@ boxplot(Oto_22_func$Bulk.Density, xlab="Genotypes", ylab="Bulk density")
 
 
 ```{r rename a column and adding new colun for otobi and umudike}
-library("dplyr") #Using rename()
+#Using rename() in dplyr
 
 colnames(Oto_22_func)
 colnames(Umu_22_func)
@@ -85,7 +88,7 @@ Oto_22_func <- Oto_22_func %>%
 ```
 
 ```{r remove column sn and add column for year and location}
-library(tidyverse)
+
 Umu_22_func <-Umu_22_func %>%
   add_column(location = "Umudike", year="2022") # add column with location and year for Umudike
 
@@ -146,9 +149,6 @@ colnames(Umu_19)
 dim(Oto_19)
 
 dim(Umu_19)
-
-
-
 ```
 
 # Rename Oto_Selected_aggre
@@ -172,13 +172,10 @@ Oto_Selected_aggre$Genotype <- as.factor(Oto_Selected_aggre$Genotype)
 Oto_Selected_aggre  <-  Oto_Selected_aggre  %>%
   add_column(location = "Otobi",year = "2020") # change the year from 2019 to 2020
  
-
-
 Umu_Selected <- Umu_19 %>% dplyr:: select('Genotype', 'swelling.index', 'swelling.power', 'WAC', 'Bulk.Density') # select the needed columns
  
 Umu_Selected  <-  Umu_Selected  %>%
   add_column(location = "Umudike",year = "2020") # add location and year to the data frame
-
 
 #add otobi and umudike 2019 data 
 Umu_oto_19 <- rbind(Oto_Selected_aggre,Umu_Selected)
@@ -189,12 +186,10 @@ Umu_oto_19 <- data.frame(Umu_oto_19 )
 Umu_oto_19 <-  Umu_oto_19  %>% relocate(location, year) # change the positions of year and location
 ```
 
-
 ```{r read in 2020_2021 data for Otobi and Umudike}
 Umu_21 <- read.csv(here::here("data", "Umu_2020_2021_PYT_Functional.csv"), head=T) # input genotypes planted in 2020 and harvested in 2021
 
 Oto_21 <- read.csv(here::here("data", "OTOBI_2020_2021_PYT_Functional.csv"), head=T)
-
 
 dim(Umu_21)
 Umu_21$Genotypes <- as.factor(Umu_21$Genotypes)
@@ -225,6 +220,7 @@ Oto_21  <-  Oto_21  %>%
 ```{r combining all three years}
 pyt_functional <- rbind(Umu_oto_19, Umu_oto_21, Umu_oto_22) # combine all three years
 dim(pyt_functional)
+pyt_functional <- pyt_functional %>% arrange(Location)
 pyt_functional = as.data.frame(pyt_functional)
 ```
 
@@ -233,7 +229,7 @@ pyt_functional = as.data.frame(pyt_functional)
 # create a new column that has Environment to make it look like the data frame in sommer example
 #rm(pyt_functional_1)
 pyt_functional_1 <- pyt_functional %>%
-unite( 'environment', location:year, sep= "_", remove = FALSE) # concantenating location and environment
+unite( 'environment', Location:Year, sep= "_", remove = FALSE) # concantenating location and environment
 
 
 #summary(wac_model)$varcomp
@@ -256,7 +252,7 @@ pyt_functional_1$Genotype = gsub(pattern = " ", replacement = "", x = pyt_functi
 library(metan)
 pyt_functional_1 <-  as.data.frame(pyt_functional_1)
 pyt_functional_1 <- as_factor(.data = pyt_functional_1, 
-                c("environment","location","year","Genotype"))
+                c("environment","Location","Year","Genotype"))
 str(pyt_functional_1)
 
 length(levels(pyt_functional_1$Genotype))
@@ -271,17 +267,17 @@ write.csv(x = pyt_functional_1$Genotype, file = "pyt_functional_all_years.csv")
 ```{r boxplot using the large data frame }
 str(pyt_functional_1)
 boxplot
-ggplot(data = pyt_functional_1,aes(x=year,y= swelling.index,fill=location)) +
-  geom_boxplot() + facet_grid(.~location)
+ggplot(data = pyt_functional_1,aes(x=Year,y= swelling.index,fill=Location)) +
+  geom_boxplot() + facet_grid(.~Location)
 
-ggplot(data = pyt_functional_1,aes(x=year,y= swelling.power,fill=location)) +
-  geom_boxplot()+facet_grid(.~location)
+ggplot(data = pyt_functional_1,aes(x=Year,y= swelling.power,fill=Location)) +
+  geom_boxplot()+facet_grid(.~Location)
 
-ggplot(data = pyt_functional_1,aes(x=year,y= WAC,fill=location))+
-  geom_boxplot()+facet_grid(.~location)
+ggplot(data = pyt_functional_1,aes(x=Year,y= WAC,fill=Location))+
+  geom_boxplot()+facet_grid(.~Location)
 
-ggplot(data = pyt_functional_1,aes(x=year,y= Bulk.Density,fill=location))+
-  geom_boxplot()+facet_grid(.~location)
+ggplot(data = pyt_functional_1,aes(x=Year,y= Bulk.Density,fill=Location))+
+  geom_boxplot()+facet_grid(.~Location)
 
 
 ```
@@ -293,15 +289,11 @@ IQR_SI <- IQR(pyt_functional_1$swelling.index, na.rm = TRUE) # interquatile rang
  
 Lower_SI <- quartiles_SI[1] - 1.5*IQR_SI
 Upper_SI <- quartiles_SI[2] + 1.5*IQR_SI
- 
 data_no_outlier_SI <- subset(pyt_functional_1, pyt_functional_1$swelling.index > Lower_SI & pyt_functional_1$swelling.index < Upper_SI)
  
 dim(data_no_outlier_SI)
-
-
-ggplot(data = data_no_outlier_SI,aes(x=year,y= swelling.index,fill=location)) +
-  geom_boxplot() + facet_grid(.~location)
-
+ggplot(data = data_no_outlier_SI,aes(x=Year,y= swelling.index,fill=Location)) +
+  geom_boxplot() + facet_grid(.~Location)
 ```
 
 ```{r remove outlier for bulk density}
@@ -315,16 +307,11 @@ data_no_outlier_WAC <- subset(pyt_functional_1, pyt_functional_1$WAC > Lower_WAC
  
 dim(data_no_outlier_WAC)
 
-ggplot(data = data_no_outlier_WAC,aes(x=year,y= WAC,fill=location)) +
-  geom_boxplot() + facet_grid(.~location)
-ggplot(data = pyt_functional_1,aes(x=year,y= WAC,fill=location))+
-  geom_boxplot()+facet_grid(.~location)
-
+ggplot(data = data_no_outlier_WAC,aes(x=Year,y= WAC,fill=Location)) +
+  geom_boxplot() + facet_grid(.~Location)
+ggplot(data = pyt_functional_1,aes(x=Year,y= WAC,fill=Location))+
+  geom_boxplot()+facet_grid(.~Location)
 ```
-
-
-
-
 
 ```{r extract each year to get the year information}
 oto20  <- droplevels(pyt_functional_1[pyt_functional_1$environment == "Otobi_2020",])
@@ -348,8 +335,6 @@ hist(Umu21$Bulk.Density)
 hist(Umu22$Bulk.Density)
 hist(Umu20$Bulk.Density)
 ```
-
-
 ```{r run linear models for wac}
 #dat1 <- droplevels(pyt_functional_1[!is.na(pyt_functional_1$WAC),])
 library(lme4)
@@ -358,17 +343,20 @@ dim(pyt_functional_1)
 ```
 
 ```{r}
-All_AMYL <-  read.csv(here::here("data/PYT_chemical_data/All_years_amylose.csv"), head=T)
-
+#All_AMYL <-  read.csv(here::here("data/PYT_chemical_data/All_years_amylose.csv"), head=T)
+#rm(All_AMYL)
 ```
 
 ```{r, trait correlation}
-corr_functional <- cor(pyt_functional_1[,-c(1:4)],  use="complete.obs") # correlation
+corr_functional <-pyt_functional_1[,-c(1:4)]
+corr_functional <- corr_functional[,-c(5)]
+corr_func <- cor(corr_functional,  use="complete.obs") # correlation
+ # correlation
+corr_func
+pairs(corr_func)
 
-pairs(corr_functional)
-
-covar_functional  <- cov(pyt_functional_1[,-c(1:4)], use="complete.obs")
-
+covar_functional  <- cov(corr_functional, use="complete.obs")
+covar_functional
 write.csv(corr_functional,file=here("./output/correlation_functional_all_year.csv")) 
 ```
 
@@ -425,13 +413,13 @@ DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_fun
 }else{
 DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
 }
- eval(parse(text=paste("model=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = pyt_functional_1)"))) # run the model
+ eval(parse(text=paste("model=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = pyt_functional_1)"))) # run the model
  
 ss <- summary(model)
 sv <- as.data.frame(ss$varcor) # get the variance component
 gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
-gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
-gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance
+gl <- sv[sv$grp == "Genotype:Location" , "vcov"] # genotype by location variance
+gy <- sv[sv$grp == "Genotype:Year" , "vcov"] # genotype by year variance
 ve <- sv[sv$grp == "Residual" , "vcov"] # residual variance
 vph <- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
 # make a matrix of the variance output
@@ -465,17 +453,17 @@ DatWithout_na = pyt_functional_1    # if there is no na, it will use the pyt_fun
 DatWithout_na = pyt_functional_1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
 }
 
-eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = DatWithout_na )")))
+eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = DatWithout_na )")))
 RES_trait<- rstudent(model2) # i am using the model that used data without missing data
 outliers<- which(abs(scale(RES_trait))>3) #Remove outlier
 Dat_no_outlier = DatWithout_na[-outliers,] # data frame without outliers
-eval(parse(text=paste("model=lmer(formula = ",trait, " ~  year + location + year:location + (1|Genotype) + (1|Genotype:year) +(1|Genotype:location), data = Dat_no_outlier )"))) # run the model
+eval(parse(text=paste("model=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = Dat_no_outlier )"))) # run the model
 ss <- summary(model)
 sv <- as.data.frame(ss$varcor) # get the variance component
 sv
 gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
-gl <- sv[sv$grp == "Genotype:location" , "vcov"] # genotype by location variance
-gy <- sv[sv$grp == "Genotype:year" , "vcov"] # genotype by year variance
+gl <- sv[sv$grp == "Genotype:Location" , "vcov"] # genotype by location variance
+gy <- sv[sv$grp == "Genotype:Year" , "vcov"] # genotype by year variance
 ve <- sv[sv$grp == "Residual" , "vcov"] # residual variance
 vph <- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
 # make a matrix of the variance output
@@ -500,17 +488,11 @@ df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frame
 df_lmer 
 ```
 
-
-
-
-
 ```{r read in the dosage file and modify the row names to match with that in the phenotypic file}
 
 snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
 
 dim(snps_dosage)
-library(rrBLUP)
-library(sommer)
 head(snps_dosage[,1:15])
 snps_dosage1 <- (snps_dosage[,-1])
 head(snps_dosage1[1:5,1:5])  
@@ -575,27 +557,29 @@ length(levels(as.factor(phen1$Genotype))) # the length of the selected pheno dat
 
 # if the legnths are equal no need subseting the snp data
 # but if the length is different we should subset the snp data in relation to the selected pheno genotypes 
-
 gsnp = which(rownames(snps_dosage) %in% levels(phen1$Genotype)) 
 
 snp2 = snps_dosage[rownames(snps_dosage)[gsnp],] # subset the snps based on the genotypes with snp and also phenotype
 dim(snp2)
 length(levels(phen1$Genotype))
 Geno_present <- rownames(snp2) %in% levels(phen1$Genotype)
-
 ```
 
 ```{r A matrix  }
 library(sommer)
 A <- rrBLUP::A.mat(snp2[,-1])
 heatmap(A)# heatmap for genotypes present in 194 genotypes
+install.packages("factoextra")
+library(factoextra)
+A_pca<-prcomp(A, scale=TRUE)
 
+fviz_eig(A_pca) # scree plot of the PCA
 
 ```
 
 ```{r  mixed model with the new genotype GA data}
-mix_wac <- mmer(WAC~ year + location+ year:location, 
-             random=~vsr(Genotype, Gu=A) + Genotype:year + Genotype:location,
+mix_wac <- mmer(WAC~ Year + Location+ Year:Location, 
+             random=~vsr(Genotype, Gu=A) + Genotype:Year + Genotype:Location,
              rcov=~units,
              data=phen1)
 
@@ -605,30 +589,28 @@ vpredict(mix_wac, h1 ~ V1/(V1+ (V2/3)+ (V3/2)+(V4/6)) ) # heritability for WAC
 
 
 #Bulk density
-mix_BD <- mmer(Bulk.Density~ year + location + year:location,
-             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+mix_BD <- mmer(Bulk.Density~ Year + Location + Year:Location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:Year + Genotype:Location,
              rcov=~units,
              data=phen1)
 summary(mix_BD)$varcomp
 vpredict(mix_BD, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))
 
 #swelling index
-mix_si <- mmer(swelling.index~ year + location + year:location,
-             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+mix_si <- mmer(swelling.index~ Year + Location + Year:Location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:Year + Genotype:Location,
              rcov=~units,
              data=phen1)
 summary(mix_si)$varcomp
 vpredict(mix_si, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))
 
 
-mix_sp <- mmer(swelling.power~ year + location + year:location,
-             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+mix_sp <- mmer(swelling.power~ Year + Location + Year:Location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:Year + Genotype:Location,
              rcov=~units,
              data=phen1)
 summary(mix_sp)$varcomp
 vpredict(mix_sp, h1 ~ V1/((V1)+(V2/3)+(V3/2)+(V4/6)))
-
-
 
 ```
 
@@ -644,8 +626,8 @@ names(vcomp) = c("vg","vgl","vgy","vp","ve")
 # h2c = tibble(h2c)
 for(traits in traitnames){
  trs = paste0(traits) # the loop will be able to select  and analyse each trait
-eval(parse(text=paste("model1= mmer(",traits,"~ year + location + year:location,
-             random=~vsr(Genotype, Gu=A)+ Genotype:year + Genotype:location,
+eval(parse(text=paste("model1= mmer(",traits,"~ Year + Location + Year:Location,
+             random=~vsr(Genotype, Gu=A)+ Genotype:Year + Genotype:Location,
              rcov=~units,
              data=phen1)")))
 
@@ -671,7 +653,6 @@ h2c = rbind(h2c,h2)
 }
 vcomp
 h2c 
-
 ```
 
 
@@ -701,14 +682,20 @@ lmer_mmer_sort <- lmer_mmer[sort(rownames(lmer_mmer)),] # sort the lmer_mmer dat
 lmer_mmer_sort
 ```
 ```{r merging the functional data with the chemical data}
-All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv"))
-
+All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv")) 
 dim(All_chem)
-pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
+#pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
 pyt_functional <- pyt_functional %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
 All_chem <- All_chem %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
+str(All_chem)
+All_chem <- All_chem[-1,] #remove row 1
+All_chem <- All_chem[-1]
+str(All_chem)
 
 All_chem <- All_chem %>% dplyr::mutate(Year_n=as.factor(Year)) %>% dplyr::select(-Year) %>% rename(Year=Year_n)
+str(All_chem)
+
+
 chem_func <- dplyr::full_join(pyt_functional, All_chem, by=c("Location", "Year", "Genotype"))
 # chem_func <- merge(pyt_functional, All_chem, all.x=FALSE)
 
@@ -719,17 +706,114 @@ str(chem_func)
 chem_func$Location <-as.factor(chem_func$Location)
 
 chem_func$Genotype <-as.factor(chem_func$Genotype)
-chem_func1 <- chem_func %>% dplyr::select(c("swelling.index","swelling.power","WAC","Bulk.Density","Amylose","Crude.Fiber"))
+chem_func1 <- chem_func %>% dplyr::select(c("swelling.index","swelling.power","WAC","Bulk.Density","Amylose","Crude.Fiber")) # select only the numeric data
+
+
 ```
 
 ```{r correlation plot of the chem_func data frame}
-head(chem_func1)
-corr <- cor(chem_func1,use = "pairwise.complete.obs")
+
 library(corrplot)
-cor_chem_func <- corrplot(corr, method = "circle",type = "full",is.corr = TRUE)
- df2 <- df %>% select(-c(id, name, chapters))   corrplot(corr, order = 'alphabet', addCoef.col = 'black') 
+corr <- cor(chem_func1,use = "pairwise.complete.obs")
+cor_chem_func <- corrplot(corr, method = "number",type = "upper",order = "alphabet", is.corr = TRUE)
+
+```
+
+
+```{r box plot of functional with amylose and crude fiber}
+chem_func2 <-chem_func %>% dplyr::select(c( "Location","Year","Genotype", "swelling.index","swelling.power","WAC", "Bulk.Density","Amylose","Crude.Fiber"))
+chem_func2$Location <- as.factor(chem_func2$Location)
+str(chem_func2)
+chem_func2 <- chem_func2[-1,]# remove row 1, it is empty and was created when I sorted my data
+
+ggplot(data = chem_func2,aes(x=Year,y= swelling.index,fill=Location)) +
+  geom_boxplot() 
+ggplot(data = chem_func2,aes(x=Year,y= swelling.power,fill=Location)) +
+  geom_boxplot()
+
+ggplot(data = chem_func2,aes(x=Year,y= WAC,fill=Location))+
+  geom_boxplot()
+
+ggplot(data = chem_func2,aes(x=Year,y= Bulk.Density,fill=Location))+
+  geom_boxplot()
+
+ggplot(data = chem_func2,aes(x=Year,y=Crude.Fiber,fill=Location))+
+  geom_boxplot()
+
+ggplot(data = chem_func2,aes(x=Year,y= Amylose,fill=Location))+
+  geom_boxplot()
+
+```
+
+
+```{r use the data with amylose and crude fiber for the lmer and broad sense heritability}
  
 ```
 
+
+```{r  making a function to run the mixed model for all the traits after removing outliers}
+traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density", "Amylose","Crude.Fiber")) # matrix of column names
+Result.h2 = matrix(nrow = 1, ncol = length(traitname)) # this is how we want the result of the heritability to appear after analysis
+colnames(Result.h2) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
+rownames(Result.h2) <- "H2Comb" # heritability for the combine analysis
+Result.vcomp = matrix(nrow = length(traitname), ncol = 5) # Result matrix for the variance components
+colnames(Result.vcomp) <- c("vg", "vgl","vgy", "vp","ve") # column names for the variance components
+rownames(Result.vcomp) <- traitname # row names of the variance components
+for(trait in traitname){
+tr = paste0(trait)  # the loop will be able to select  and analyse each trait
+Na_g = which(is.na(chem_func2[,tr]))# identify traits with missing data
+if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
+DatWithout_na = chem_func2    # if there is no na, it will use the pyt_functional_1 data frame
+}else{
+DatWithout_na = chem_func2[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
+}
+
+eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = DatWithout_na )")))
+RES_trait<- rstudent(model2) # i am using the model that used data without missing data
+outliers<- which(abs(scale(RES_trait))>3) #Remove outlier
+Dat_no_outlier = DatWithout_na[-outliers,] # data frame without outliers
+eval(parse(text=paste("model=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = Dat_no_outlier )"))) # run the model
+ss <- summary(model)
+sv <- as.data.frame(ss$varcor) # get the variance component
+sv
+gv <- sv[sv$grp=="Genotype", "vcov"] # genetic variance
+gl <- sv[sv$grp == "Genotype:Location" , "vcov"] # genotype by location variance
+gy <- sv[sv$grp == "Genotype:Year" , "vcov"] # genotype by year variance
+ve <- sv[sv$grp == "Residual" , "vcov"] # residual variance
+vph <- gv + gl/2 + gy/3 + ve/6 # variance due to phenotype
+# make a matrix of the variance output
+H2 <- gv/vph
+Result.vcomp[trait,1] = gv
+Result.vcomp[trait,2] = gl
+Result.vcomp[trait,3] = gy
+Result.vcomp[trait,4] = ve
+Result.vcomp[trait,5] = vph
+Result.h2[,trait] = H2
+}
+
+Result.vcomp
+
+Result.h2
+
+Result.h2 <- data.frame(Result.h2) # making a data frame for the heritability output
+Result.vcomp <- data.frame(Result.vcomp) #making a data frame for the vcomp output
+T_h2 <- t(Result.h2) # transpose the heritability output
+
+df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frame
+df_lmer 
+```
+
+
+```{r}
+umu_hav_2020 <-read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/2020_Umu_pyt_harvest_dmc.csv")
+colnames(umu_hav_2020)
+
+oto_hav_2020 <- read.csv("/Users/ca384/Documents/ChinedoziRepo/GarriQuality/data/2020_0t0bi_pyt_harvest_dmc.csv")
+colnames(oto_hav_2020)
+
+umu_hav_2020<- umu_hav_2020 %>% 
+       rename(year = years) 
+Umu_Oto_2020_hvst <- rbind(umu_hav_2020,oto_hav_2020)
+```
 
 
