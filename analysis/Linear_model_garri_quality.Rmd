@@ -982,13 +982,18 @@ names(vcomp) = c("vg","vgl","vgy","vp","ve")
 # h2c = as.data.frame(h2c)
 # rownames(h2c) = traitnames
 # h2c = tibble(h2c)
+idm = which(rownames(Gmat) %in% Dat_no_outlier2$Genotype) # which snps are found in phenotype
+Gmat1 = Gmat[idm,idm] # subset of The GMat
+idg = Dat_no_outlier2$Genotype %in% rownames(Gmat)# phenotype in marker
+Dat_no_outlier3 = Dat_no_outlier2[idg,]# row numbers 
+all(Dat_no_outlier3$Genotype %in% rownames(Gmat1))# to check if data have both phenotype and genotype
 for(traits in traitnames){
  trs = paste0(traits) # the loop will be able to select  and analyse each trait
 eval(parse(text=paste(
   "model1= mmer(",traits,"~ Year + Location + Year:Location,
-  random=~vsr(Genotype, Gu=Gmat) + Genotype:Year + Genotype:Location,
+  random=~vsr(Genotype, Gu=Gmat1) + Genotype:Year + Genotype:Location,
   rcov=~units,
-  data= Dat_no_outlier2)")))
+  data= Dat_no_outlier3)")))
 
 summary(model1)
 ss = summary(model1)
