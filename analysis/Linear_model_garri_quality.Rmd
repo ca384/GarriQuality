@@ -50,6 +50,7 @@ str(Umu_22_func)
 summary(Oto_22_func)
 summary(Umu_22_func)
 ```
+
 ```{r creating plots}
 boxplot(Oto_22_func$wac. , main="Water absorbing capacity of garri OTO",ylab = "WAC",xlab="Genotypes")
 
@@ -639,6 +640,7 @@ names(vcomp) = c("vg","vgl","vgy","vp","ve")
 # h2c = tibble(h2c)
 for(traits in traitnames){
  trs = paste0(traits) # the loop will be able to select  and analyse each trait
+ 
 eval(parse(text=paste("model1= mmer(",traits,"~ Year + Location + Year:Location,
              random=~vsr(Genotype, Gu=A)+ Genotype:Year + Genotype:Location,
              rcov=~units,
@@ -698,7 +700,10 @@ lmer_mmer_sort
 ```{r merging the functional data with the chemical data}
 All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv")) 
 dim(All_chem)
-pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
+which(All_chem$Crude.Fiber > 25)
+All_chem[393,"Crude.Fiber"] = NA
+
+#pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
 pyt_functional <- pyt_functional %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
 All_chem <- All_chem %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
 str(All_chem)
@@ -731,10 +736,130 @@ str(chem_func)
 chem_func1 <- chem_func %>% dplyr::select(c("swelling.index","swelling.power","WAC","Bulk.Density","Amylose","Crude.Fiber")) # select only the numeric data
 ```
 
+```{r importing 2020 starch and sugar for Umudike}
+Umu_20_starch_sugar <- read.csv(here::here("data/PYT_chemical_data/UmU_2019_2020_starch_sugar_HCN.csv"))
+
+Umu_20_starch_sugar$Year <- as.factor(Umu_20_starch_sugar$Year)
+
+Umu_20_starch_sugar$Location <- as.factor(Umu_20_starch_sugar$Location)
+
+Umu_20_starch_sugar$Genotype <- as.factor(Umu_20_starch_sugar$Genotype)
+
+Umu_20_starch_sugar <- Umu_20_starch_sugar %>% group_by(Year, Location, Genotype) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+Umu_20_starch_sugar <- Umu_20_starch_sugar %>%
+  dplyr::select( Year,Location, Genotype, STARCH,SUGAR )
+
+```
+
+```{r, importing 2020 starch and sugar for otobi}
+Oto_20_starch_sugar <-read.csv(here::here("data/PYT_chemical_data/Oto_2019_2020_Starch_sugar_HCN.csv"))
+
+Oto_20_starch_sugar$Year <- as.factor(Oto_20_starch_sugar$Year)
+
+Oto_20_starch_sugar$Location <- as.factor(Oto_20_starch_sugar$Location)
+
+Oto_20_starch_sugar$Genotype <- as.factor(Oto_20_starch_sugar$Genotype)
+
+Oto_20_starch_sugar <- Oto_20_starch_sugar %>% group_by(Year, Location, Genotype) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+Oto_20_starch_sugar <- Oto_20_starch_sugar %>%
+  dplyr::select( Year,Location, Genotype, STARCH,SUGAR)
+
+```
+
+```{r, importing 2021 starch and sugar for Umudike}
+
+Umu_21_starch_garri <- read.csv(here::here("data/PYT_chemical_data/2020_2021_umu_garri_starch_sugar.csv"))
+
+dim(Umu_21_starch_garri)
+Umu_21_starch_garri$Year <- as.factor(Umu_21_starch_garri$Year)
+
+Umu_21_starch_garri$Location <- as.factor(Umu_21_starch_garri$Location)
+
+Umu_21_starch_garri$Genotype <- as.factor(Umu_21_starch_garri$Genotype)
+
+```
+
+```{r, importing 2021 starch and sugar for otobi}
+Oto_21_starch_garri <- read.csv(here::here("data/PYT_chemical_data/2020_2021_Oto_garri_starch_sugar.csv"))
+
+Oto_21_starch_garri$Year <- as.factor(Oto_21_starch_garri$Year)
+
+Oto_21_starch_garri$Location <- as.factor(Oto_21_starch_garri$Location)
+
+Oto_21_starch_garri$Genotype <- as.factor(Oto_21_starch_garri$Genotype)
+
+```
+
+
+```{r importing 2022 starch and sugar for Umudike }
+
+Umu_22_starch_sugar <- read.csv(here::here("data/PYT_chemical_data/2022_umu_starch_garri.csv"))
+
+Umu_22_starch_sugar$Year <- as.factor(Umu_22_starch_sugar$Year)
+
+Umu_22_starch_sugar$Location <- as.factor(Umu_22_starch_sugar$Location)
+
+Umu_22_starch_sugar$Genotype <- as.factor(Umu_22_starch_sugar$Genotype)
+
+
+```
+
+
+```{r importing 2022 starch and sugar for otobi}
+
+Oto_22_starch_sugar <-read.csv(here::here("data/PYT_chemical_data/2022_Oto_garri_starch_sugar.csv"))
+
+Oto_22_starch_sugar$Year <- as.factor(Oto_22_starch_sugar$Year)
+
+Oto_22_starch_sugar$Location <- as.factor(Oto_22_starch_sugar$Location)
+
+Oto_22_starch_sugar$Genotype <- as.factor(Oto_22_starch_sugar$Genotype)
+
+```
+
+```{r binding all data }
+
+starch_sugar <- rbind(Oto_20_starch_sugar, Oto_21_starch_garri,Oto_22_starch_sugar, Umu_20_starch_sugar, Umu_21_starch_garri,  Umu_22_starch_sugar)
+
+dim(starch_sugar)
+str(starch_sugar)
+starch_sugar <- as.data.frame(starch_sugar)
+```
+
+```{r merging starch and sugar with the previous data. chem-pheno}
+library(dplyr)
+starch_sugar <- starch_sugar %>% relocate(Location, Year) # change the position of the location and year
+
+
+chem_pheno <- dplyr::full_join(chem_func2, starch_sugar, by=c("Location", "Year", "Genotype"))
+
+```
+
+
+```{r clean the new data frame chem_pheno}
+
+levels(chem_pheno$Genotype)[levels(chem_pheno$Genotype) =="TME419"] = "TMEB419" # changing genotype name pattern
+
+levels(chem_pheno$Genotype)[levels(chem_pheno$Genotype) =="IITA-TMS-1BA30572"] = "IITA-TMS-IBA30572" # changing genotype name pattern
+
+
+chem_pheno$Genotype = gsub(pattern = " ", replacement = "", x = chem_pheno$Genotype) # remove space from the genotype name
+chem_pheno$Genotype<- as.factor(chem_pheno$Genotype)
+
+levels(chem_pheno$Genotype)[levels(chem_pheno$Genotype) =="IITA-TMS-1BA00070"] = "IITA-TMS-IBA00070" # changing genotype name pattern
+
+str(chem_pheno)
+chem_pheno1 <- chem_pheno %>% dplyr::select(c("swelling.index","swelling.power","WAC","Bulk.Density","Amylose","Crude.Fiber", "STARCH","SUGAR")) # select only the numeric data
+```
+
 
 ```{r correlation plot of the chem_func data frame}
 library(corrplot)
-corr <- cor(chem_func1,use = "pairwise.complete.obs")
+corr <- cor(chem_pheno1,use = "pairwise.complete.obs")
 cor_chem_func <- corrplot(corr, method = "number",type = "upper",order = "alphabet", is.corr = TRUE)
 ```
 
@@ -766,7 +891,7 @@ ggplot(data = chem_func2,aes(x=Year,y= Amylose,fill=Location))+
 ```
 
 ```{r use the data with amylose and crude fiber for the lmer and broad sense heritability removing outliers}
-traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density", "Amylose","Crude.Fiber")) # matrix of column names
+traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density", "Amylose","Crude.Fiber","STARCH","SUGAR")) # matrix of column names
 Result.h2 = matrix(nrow = 1, ncol = length(traitname)) # this is how we want the result of the heritability to appear after analysis
 colnames(Result.h2) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
 rownames(Result.h2) <- "H2Comb" # heritability for the combine analysis
@@ -775,18 +900,22 @@ colnames(Result.vcomp) <- c("vg", "vgl","vgy", "vp","ve") # column names for the
 rownames(Result.vcomp) <- traitname # row names of the variance components
 for(trait in traitname){
 tr = paste0(trait)  # the loop will be able to select  and analyse each trait
-Na_g = which(is.na(chem_func2[,tr]))# identify traits with missing data
-if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
-DatWithout_na = chem_func2    # if there is no na, it will use the pyt_functional_1 data frame
-}else{
-DatWithout_na = chem_func2[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
-}
-
-eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = DatWithout_na )")))
-RES_trait<- rstudent(model2) # i am using the model that used data without missing data
+Na_g = which(is.na(chem_pheno[,tr]))# identify traits with missing data
+  if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
+    DatWithout_na2 = chem_pheno    # if there is no na, it will use the chem_pheno data frame
+  }else{
+    DatWithout_na2 = chem_pheno[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe chem_func2[-Na_g,] that has all the na removed
+  }
+eval(parse(text=paste("model3=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = DatWithout_na2 )")))
+RES_trait<- rstudent(model3) # i am using the model that used data without missing data
 outliers<- which(abs(scale(RES_trait))>3) #Remove outlier
-Dat_no_outlier = DatWithout_na[-outliers,] # data frame without outliers
-eval(parse(text=paste("model=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = Dat_no_outlier )"))) # run the model
+if(length(outliers) == 0){
+  Dat_no_outlier2 = DatWithout_na2
+}else{
+  Dat_no_outlier2 = DatWithout_na2[-outliers,]
+}
+#Dat_no_outlier2 = DatWithout_na2[-outliers,] # data frame without outliers
+eval(parse(text=paste("model=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = Dat_no_outlier2 )"))) # run the model
 ss <- summary(model)
 sv <- as.data.frame(ss$varcor) # get the variance component
 sv
@@ -819,28 +948,59 @@ df_lmer
 
 ```{r using data with no outlier to make boxplot}
 
-ggplot(data = Dat_no_outlier,aes(x=Year,y= swelling.index,fill=Location)) +
+ggplot(data = Dat_no_outlier2,aes(x=Year,y= swelling.index,fill=Location)) +
    geom_boxplot() 
-ggplot(data = Dat_no_outlier,aes(x=Year,y= swelling.power,fill=Location)) +
+ggplot(data = Dat_no_outlier2,aes(x=Year,y= swelling.power,fill=Location)) +
   geom_boxplot()
-ggplot(data = Dat_no_outlier,aes(x=Year,y= WAC,fill=Location))+
+ggplot(data = Dat_no_outlier2,aes(x=Year,y= WAC,fill=Location))+
    geom_boxplot()
-ggplot(data = Dat_no_outlier,aes(x=Year,y= Bulk.Density,fill=Location)) +
+ggplot(data = Dat_no_outlier2,aes(x=Year,y= Bulk.Density,fill=Location)) +
   geom_boxplot()
  
-ggplot(data = Dat_no_outlier,aes(x=Year,y= Amylose,fill=Location)) +
+ggplot(data = Dat_no_outlier2,aes(x=Year,y= Amylose,fill=Location)) +
   geom_boxplot()
 
-ggplot(data = Dat_no_outlier,aes(x=Year,y=Crude.Fiber,fill=Location)) +
+ggplot(data = Dat_no_outlier2,aes(x=Year,y=Crude.Fiber,fill=Location)) +
   geom_boxplot()
  
  
+```
+
+```{r}
+head(Dat_no_outlier2)
+
+Dat_no_outlier3 <- Dat_no_outlier2 %>%            
+  dplyr::rename("SI" = "swelling.index", "SP" = "swelling.power", "BD" = "Bulk.Density", "AMY" = "Amylose", "CF" = "Crude.Fiber", "STA"= "STARCH", "SUG"= "SUGAR")
+trait= c("SI","SP", "WAC", "BD", "AMY", "CF", "STR","SUG" )
+narrow_Dat_no_outlier <- Dat_no_outlier3 %>%
+  gather(key = trait, value = y, -c(Location,Year, Genotype))
+
+boxplot_Dat_no_outlier <- ggplot(data = Dat_no_outlier3, aes(x=Location,y=y, fill=trait)) +
+  geom_boxplot( stat = "boxplot",  outlier.colour = "red", outlier.shape = 16, outlier.size = 0.5, na.rm=TRUE) +
+  stat_summary(fun=mean, colour="blue", geom="point", na.rm = TRUE) +
+  labs(x= "Location", y= "Response values") + theme_bw() +
+  theme(axis.title = element_text(colour="black",face="bold", size=10),
+        plot.title = element_text(hjust = 0.5,lineheight=.5,colour="black",face="bold", size=9),
+        axis.text = element_text(face="bold", size=5), axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")+
+  facet_grid(trait~Year, scales = "free")
+
+boxplot_Dat_no_outlier
+
 ```
 
 ```{r correlation with data without outlier}
-corr <- cor(chem_func1,use = "pairwise.complete.obs")
-cor_chem_func <- corrplot(corr, method = "number",type = "upper",order = "alphabet", is.corr = TRUE)
+
+Dat_no_outlier4 <- Dat_no_outlier3 %>%            
+  dplyr::select("SP", "WAC", "BD", "AMY", "CF", "STA", "SUG")
+
+#colnames(Dat_no_outlier2) = c("SI", "SP", "WAC", "BD", "AMY", "CF") # Renaming the column sequentially
+
+corr <- cor(Dat_no_outlier4,use = "pairwise.complete.obs")
+cor_chemfunc <- corrplot(corr, method = "number",type = "upper",order = "alphabet", is.corr = TRUE)
 ```
+
+
+
 ```{r}
 #removing missing data
 for (j in 1:ncol(snps_dosage)) {
@@ -848,9 +1008,9 @@ for (j in 1:ncol(snps_dosage)) {
         j])
 }
 
-table(rownames(snps_dosage) == chem_func2$Genotype)
+table(rownames(snps_dosage) == Dat_no_outlier3$Genotype)
 
-table(chem_func2$Genotype == rownames(snps_dosage) )
+table(Dat_no_outlier3$Genotype == rownames(snps_dosage) )
 
 #snps_dosage1 = snps_dosage[,-1] # remove the column 1 of the snps file
 # new_snp <- cbind(geno_name,snps_dosage) # Combine the new and old order genotype names in one data frame.
@@ -859,43 +1019,45 @@ table(chem_func2$Genotype == rownames(snps_dosage) )
 ```{r}
 # gen = which(rownames(snps_dosage) %in%pyt_functional_1$Genotype ) # 
 # Subset the pheno data that has snp data 
-gt2 = which(chem_func2$Genotype %in% rownames(snps_dosage) ) # identify the row number/genotype name those gentypes from pheno to snps
+gt2 = which(Dat_no_outlier3$Genotype %in% rownames(snps_dosage) ) # identify the row number/genotype name those gentypes from pheno to snps
 
-phen2 = droplevels(chem_func2[gt2,]) # subset the pheno data that found in the snp data
+phen_new = droplevels(Dat_no_outlier3[gt2,]) # subset the pheno data that found in the snp data
 
-head(phen2)
-dim(phen2)
-dim(chem_func2)
+head(phen_new)
+dim(phen_new)
+
 length(rownames(snps_dosage)) # length row name of the snps
-length(levels(as.factor(phen2$Genotype))) # the length of the selected pheno data genotype levels 
+length(levels(as.factor(phen_new$Genotype))) # the length of the selected pheno data genotype levels 
 
 # if the legnths are equal no need subseting the snp data
 # but if the length is different we should subset the snp data in relation to the selected pheno genotypes
 library(ASRgenomics)
-gsnp2 = which(rownames(snps_dosage) %in% levels(phen2$Genotype)) 
+gsnp2 = which(rownames(snps_dosage) %in% levels(phen_new$Genotype)) 
 
 snp3 = snps_dosage[rownames(snps_dosage)[gsnp2],] # subset the snps based on the genotypes with snp and also phenotype
 
-gph2 = which(levels(phen2$Genotype) %in% rownames(snps_dosage))# looking for phenotype data in snps_dosage file.
-phen3 = phen2[gph2, ]
-all(phen3$Genotype %in% rownames(snp3))
-length(levels(phen3$Genotype))
-all(rownames(snp3) %in% levels(phen2$Genotype))
+gph2 = which(phen_new$Genotype %in% rownames(snps_dosage))# looking for phenotype data in snps_dosage file.
+phen_new1 = phen_new[gph2, ]
+dim(phen_new1)
+all(phen_new1$Genotype %in% rownames(snp3))
+length(levels(phen_new1$Genotype))
+all(rownames(snp3) %in% phen_new1$Genotype)
 ```
 
 ```{r script from moshood to clean up the snps file using the ASRgenomics}
 #A1 <- rrBLUP::A.mat(snp2[,-1])
-snp2 <- snp2[,-1]
-snp2 <- as.data.frame(snp2)
-snp2 <- snp2[,-1]
-snp2 <- as.matrix(snp2)
-snpsFilter  <- qc.filtering(M=snp2, base=FALSE, ref=NULL,
+snps_dosage1 <- snps_dosage[,-1]
+snps_dosage1 <- as.data.frame(snps_dosage1)
+snps_dosage1<- snps_dosage1[,-1]
+snps_dosage1<- as.matrix(snps_dosage1)
+snpsFilter  <- qc.filtering(M=snps_dosage1, base=FALSE, ref=NULL,
         marker.callrate=0.2,ind.callrate=0.2, maf=0.05,heterozygosity=0.95,
         Fis=1, impute=FALSE,  plots=FALSE,message=FALSE)$M.clean
 
 # compute genomic relationship matrix from filtered SNPS marker
 Gmat  <- G.matrix(M = snpsFilter, method = "VanRaden", na.string = NA,message=FALSE)$G
 
+heatmap(Gmat)
 # Tuning the G-matrix (Gmat) by bending i.e. adjust it near a positive definite
 # by making some of its very small or negative eigenvalues slightly positive (Matrix::nearPD # Bend the Gmat matr
 G_bend <- G.tuneup(G=Gmat, bend=TRUE, eig.tol = 1e-06,message=FALSE)$Gb 
@@ -919,7 +1081,7 @@ G_blend <- G.tuneup(G=G_bend, blend=TRUE, pblend=0.02,message=FALSE)$Gb
 
 
 ```{r}
-traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density", "Amylose","Crude.Fiber")) # matrix of column names
+traitname<- (c("SI",    "SP",   "WAC",    "BD", "AMY",   "CF",     "STA",    "SUG")) # matrix of column names
 Result.h2 = matrix(nrow = 1, ncol = length(traitname)) # this is how we want the result of the heritability to appear after analysis
 colnames(Result.h2) <- traitname # naming the colnames of the heritability output so we can identify which trait has that heritability
 rownames(Result.h2) <- "H2Comb" # heritability for the combine analysis
@@ -928,17 +1090,21 @@ colnames(Result.vcomp) <- c("vg", "vgl","vgy", "vp","ve") # column names for the
 rownames(Result.vcomp) <- traitname # row names of the variance components
 for(trait in traitname){
   tr = paste0(trait)  # the loop will be able to select  and analyse each trait
-  Na_g = which(is.na(chem_func2[,tr]))# identify traits with missing data
+  Na_g = which(is.na(phen_new1[,tr]))# identify traits with missing data
   if(length(Na_g) == 0){                 # to see if there is any null within the length within the length
-    DatWithout_na = chem_func2    # if there is no na, it will use the pyt_functional_1 data frame
+    DatWithout_na = phen_new1# if there is no na, it will use the pyt_functional_1 data frame
   }else{
-    DatWithout_na2 = chem_func2[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
+    DatWithout_na2 = phen_new1[-Na_g,]  # if there is missing data in the data frame, the use a new dataframe pyt_functional_1[-Na_g,] that has all the na removed
   }
   
   eval(parse(text=paste("model2=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = DatWithout_na2 )")))
   RES_trait<- rstudent(model2) # i am using the model that used data without missing data
   outliers<- which(abs(scale(RES_trait))>3) #Remove outlier
-  Dat_no_outlier2 = DatWithout_na2[-outliers,] # data frame without outliers
+  if(length(outliers) == 0){
+  Dat_no_outlier2 = DatWithout_na2
+}else{
+  Dat_no_outlier2 = DatWithout_na2[-outliers,]
+}# data frame without outliers
   eval(parse(text=paste("model=lmer(formula = ",trait, " ~  Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) +(1|Genotype:Location), data = Dat_no_outlier2 )"))) # run the model
   ss <- summary(model)
   sv <- as.data.frame(ss$varcor) # get the variance component
@@ -972,13 +1138,13 @@ df_lmer
 
 
 
+#the best data
+```{r function to loop all mixed models using the GA matrix for all traits using data without outliers, also made the boxplot of the physicochemical in a loop}
+traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STA", "SUG"))
 
-```{r function to loop all mixed models using the GA matrix for all traits}
-traitnames<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density", "Amylose","Crude.Fiber"))
-
-h2c = tibble() # an empty table that will contain the heritability for all the traits
 vcomp = tibble() # an empty table that will contains the variance components
-names(vcomp) = c("vg","vgl","vgy","vp","ve")
+
+filtered_value <- tibble() # for boxplot
 # h2c = as.data.frame(h2c)
 # rownames(h2c) = traitnames
 # h2c = tibble(h2c)
@@ -989,11 +1155,18 @@ Dat_no_outlier3 = Dat_no_outlier2[idg,]# row numbers
 all(Dat_no_outlier3$Genotype %in% rownames(Gmat1))# to check if data have both phenotype and genotype
 for(traits in traitnames){
  trs = paste0(traits) # the loop will be able to select  and analyse each trait
-eval(parse(text=paste(
+ out_ind <- which(Dat_no_outlier3[,paste(traits)] %in% boxplot.stats(Dat_no_outlier3[,paste(traits)])$out)
+
+ if(length(out_ind) == 0){
+ Data1 = Dat_no_outlier3
+ }else{
+ Data1 = Dat_no_outlier3[-out_ind,]
+ }
+ eval(parse(text=paste(
   "model1= mmer(",traits,"~ Year + Location + Year:Location,
   random=~vsr(Genotype, Gu=Gmat1) + Genotype:Year + Genotype:Location,
   rcov=~units,
-  data= Dat_no_outlier3)")))
+  data=Data1)")))
 
 summary(model1)
 ss = summary(model1)
@@ -1003,34 +1176,146 @@ vgy = ss[2,"VarComp"]
 vgl = ss[3,"VarComp"]
 ve = ss[4,"VarComp"]
 vp =  vg + vgl/2 + vgy/3  + ve/6 
-tt = cbind(vg,vgl, vgy, vp, ve)
+h = round(vg/vp,3)
+tt = cbind("Trait" = paste(traits), "Method" = "mmer", "vg" = round(vg,3), "vgl" = round(vgl,3), "vgy" = round(vgy,3), "vph" = round(vp,3), "ve" = round(ve,3), "H2" = h)
 
 rownames(tt) = paste(traits) # This will calculate the heritability of each of the traits
 
-vcomp = rbind(vcomp,tt) # this bind the variance components to the functional properties
+## variance comp and h2 for lmer 
 
-name = paste0(traits)
-h2 = vpredict(model1, ~ V1/(V1 + (V2/3) + (V3/2)+(V4/6)) )
-h2 = as.data.frame(h2)
-rownames(h2) = paste0(traits)
-h2c = rbind(h2c,h2)
+eval(parse(text=paste(
+  "model2= lmer(",traits,"~ Year + Location + Year:Location + (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+  data=Data1)")))
 
+
+summary(model2)
+ss1 = summary(model2)
+ss1 = data.frame(ss1$varcor)
+vg1 = ss1[ss1$grp == "Genotype","vcov"] # assigning names to the variance component in column 1
+vgy1 = ss1[ss1$grp == "Genotype:Year","vcov"]
+vgl1 = ss1[ss1$grp == "Genotype:Location","vcov"]
+ve1 = ss1[ss1$grp == "Residual","vcov"] 
+vp1 =  vg1 + vgl1/2 + vgy1/3  + ve1/6 
+h1 = round(vg1/vp1,3)
+
+tt1 = cbind("Trait" = paste(traits), "Method" ="lmer","vg" = round(vg1,3), "vgl" = round(vgl1), "vgy" = round(vgy1,3), "vph" = round(vp1,3), "ve" = round(ve1,3), H2 = h1)
+
+vccomb = rbind(tt,tt1)
+vcomp = rbind(vcomp,vccomb) # this bind the variance components to the functional properties
+
+Bx_1 <- Data1[,traits]
+Bx_2 <- cbind(Year=as.character(Data1$Year), Location=as.character(Data1$Location),Geno = as.character(Data1$Genotype), trait=paste0(traits), value=Bx_1)
+filtered_value= rbind(filtered_value, Bx_2)
 }
+
+# long format
 vcomp
 h2c 
+filtered_value$value=as.numeric(filtered_value$value)
+ggplot(filtered_value, aes(x = Location, y=value, fill=Location))+
+  geom_boxplot() +
+  facet_grid(trait~Year,  scales = "free")
+
+write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Heritability_lmer_mmer.csv")
+
+filtered_value$value = as.numeric(filtered_value$value)
+ddd = dcast(data = filtered_value, formula = Year + Location + Geno ~ trait, fun.aggregate = mean, value.var = "value", na.rm= T) # mean of the genotypes across location and years
+indv_cor <- round(cor(ddd[, -c(1,2,3)],use = "pairwise.complete.obs"),3)
+corrplot(indv_cor, type = "upper",method = "number", number.digits = 3, is.corr = T)
+
+
+
+write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Variance _comp_heritability.csv")
+
+
+#mean trait corr
+#genomean  = dcast(data = filtered_value, formula = Geno ~ trait, fun.aggregate = mean, value.var = "value", na.rm= T)
+#geno_cor <- cor(genomean[, -c(1)],use = "pairwise.complete.obs")
+
 ```
 
-```{r creating tables}
-df_lmer <- cbind(Result.vcomp, T_h2 ) # bind the two data frames
+```{r, genomic prediction for the chemical_functional properties of garri}
+set.seed(123)
+Acc_pred <- tibble()
+traits<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STA", "SUG"))
 
-colnames(df_mmer)[6] = "H2Comb"
-df_mmer1 = df_mmer[,-7]
-rownames(df_mmer1) <- c("swelling.index_mmer", "swelling.power_mmer", "WAC_mmer", "Bulk.Density_mmer")
-rownames(df_lmer) <- c("swelling.index_lmer", "swelling.power_lmer", "WAC_lmer", "Bulk.Density_lmer")
+library(emmeans)
+library(lme4)
+mean_Data1<- tibble()
+for(Trait in traits){
+  eval(parse(text = paste("ansm <- lmer(",Trait,"~ (Genotype) + Location +
+    (1|Year) ,
+      data= Data1)")))
+  em = emmeans(object = ansm, specs = ~ Genotype)
+  em = as.data.frame(em)
+  m2 = cbind(Trait = paste(Trait), em[,1:2])
+  mean_Data1 = rbind(mean_Data1,m2)
 
-lmer_mmer <- rbind(df_lmer, df_mmer1) # bind the two data frames
+}
 
-lmer_mmer
+library(reshape)
+Meanwide <-dcast(data = mean_Data1, formula = Genotype ~ Trait, fun.aggregate = mean,
+                 value.var = "emmean")
+#mean_Data1 <- Data1%>% group_by(Genotype) %>%
+#summarise_if(is.numeric, mean, na.rm = TRUE)
 
-lmer_mmer_sort <- lmer_mmer[sort(rownames(lmer_mmer)),] # sort the lmer_mmer data frame according to the rownames
-lmer_mmer_sort
+for(Trait in traits) {
+  # Creating a folder that contain 5 subset with 5times with a total of 5*5*8(traits)= 200
+  fold5 = caret::createMultiFolds(y = unique(Meanwide$Genotype), k = 5, times = 5)
+
+
+  for(i in 1:length(fold5)){
+    index = fold5[[i]] # the index of the sample for training set
+    #subset the phenotypic data
+    train_geno <- droplevels(unique(Meanwide$Genotype)[index])
+    train_geno_ind <- which(Meanwide$Genotype %in% train_geno)
+    train.data <- droplevels(Meanwide %>%
+                               filter(row_number() %in% train_geno_ind)) # subset the training set
+    dim(train.data)
+    test.data <- droplevels(Meanwide %>%
+                              filter(!row_number() %in% train_geno_ind)) # subset the testing set
+    dim(test.data)
+    test.data1 <- test.data
+    test.data[,traits] = NA # change the grain yield of the training set to NA value
+
+    mod_dat <- rbind(train.data, test.data) # combine the the data set for analysis
+
+    #####################
+
+
+    eval(parse(text = paste("ans4 <- mmer(",Trait,"~1,
+  random=~vsr(Genotype, Gu=Gmat1),
+      rcov=~units,
+      data= mod_dat)")))
+
+    pblub = as.data.frame(ans4$U$`u:Genotype`)
+    pblub = cbind(rownames(pblub),pblub)
+    colnames(pblub)[1] = "Genotype"
+    testind = which(pblub$Genotype %in% unique(test.data$Genotype))
+    testpred = pblub[testind,]
+    testpred$Genotype %in% unique(test.data$Genotype)
+    testpred = testpred[order(testpred$Genotype),]
+
+    obs_test =  test.data1 %>% group_by(Genotype) %>%
+      summarise_at(.vars = Trait, .funs = mean)
+    obs_test= obs_test[order(obs_test$Genotype),]
+    r = cbind( Trait, predictability = round(cor(testpred[,Trait],obs_test[,Trait], use = "pairwise.complete.obs"),3))
+    colnames(r)[2] <- c("predictability")
+    Acc_pred = rbind(Acc_pred,r)
+
+
+  }
+}
+#}
+Acc_pred$predictability= as.numeric(Acc_pred$predictability)
+ggplot(Acc_pred, mapping = aes(x = Trait, y = predictability, fill = Trait)) +
+  geom_boxplot() + theme_bw()
+
+
+
+ggplot()
+
+```
+
+
+
