@@ -37,7 +37,7 @@ head(Oto_22)
 summary(Oto_22)
 
 Umu_21 <- read.csv(here::here("data/PYT_chemical_data", "Umudike_garri_pyt_2021.csv"), head=T)
-View(Umu_21)
+
 summary(Umu_21)
 
 Umu_22 <- read.csv(here::here("data/PYT_chemical_data", "Umudike_garri_amylose_2022.csv"), head=T)
@@ -46,37 +46,42 @@ summary(Umu_22)
 ```
 
 ```{r work on Umu_oto data to be same form with the rest of the data}
-#Umu_oto_Amyl_20 <- Umu_oto_Amyl_20 %>% relocate(Year, Location) # change the order of the year and the location
+Umu_oto_Amyl_20 <- Umu_oto_Amyl_20 %>% relocate(Year, Location) # change the order of the year and the location
 
 #Umu_oto_Amyl_20<- Umu_oto_Amyl_20 %>% 
-       #rename(Amylose= AMYLOSE) 
+     # dplyr::rename(Amylose= AMYLOSE) 
+
 ```
 
 
 ```{r binding the All the data}
-All_amyl<-rbind(Umu_oto_Amyl_20,Oto_21,Oto_22,Umu_21,Umu_22)
+All_amyl<- rbind(Umu_oto_Amyl_20,Oto_21,Oto_22,Umu_21,Umu_22)
 dim(All_amyl)
 str(All_amyl)
 All_amyl$Year<-as.factor(All_amyl$Year)
 All_amyl$Location<-as.factor(All_amyl$Location)
 All_amyl$Genotype<-as.factor(All_amyl$Genotype)
 
+All_amyl_cf <- All_amyl %>% arrange(Location) # sort the data according to Location
+
+
 ```
 
 ```{r}
-write.csv(x = All_amyl, file = "data/PYT_chemical_data/All_years_chem.csv")
+write.csv(x = All_amyl_cf, file = "data/PYT_chemical_data/All_years_chem.csv")
 
-All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv"))
-head(All_AMYL)
-All_AMYL<- All_AMYL %>% 
-     rename(year=Year, location=Location) 
-All_AMYL=All_AMYL[-1]
+All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv"), header=TRUE)
+str(All_chem)
+head(All_chem)
+All_chem<- All_chem %>%dplyr::rename(year=Year, location=)
+    
+All_chem=All_chem[-1]
 
-All_AMYL$year<-as.factor(All_AMYL$year)
-All_AMYL$location<-as.factor(All_AMYL$location)
-All_AMYL$Genotype<-as.factor(All_AMYL$Genotype)
-str(All_AMYL)
-summary(All_AMYL)
+All_chem$year <-as.factor(All_chem$year)
+All_chem$location<-as.factor(All_chem$location)
+All_chem$Genotype<-as.factor(All_chem$Genotype)
+str(All_chem)
+summary(All_chem)
 ```
 
 ```{r looking for genotypes in snp_dosage that are in chem_func}

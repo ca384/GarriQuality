@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r Check that I have the packages}
-packages_used <- c("workflowr", "tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR","corrplot")
+packages_used <- c("workflowr", "tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR","corrplot", "ASRgenomics", "reshape2")
 ip <- installed.packages()
 all_packages_installed <- TRUE
 for (package in packages_used){
@@ -71,15 +71,15 @@ boxplot(Oto_22_func$Bulk.Density, xlab="Genotypes", ylab="Bulk density")
 colnames(Oto_22_func)
 colnames(Umu_22_func)
 Umu_22_func <- Umu_22_func %>% 
-       rename(Bulk.Density = AverageBD) # rename bulk density
+      dplyr::rename(Bulk.Density = AverageBD) # rename bulk density
 
 Umu_22_func <- Umu_22_func %>% 
-       rename(WAC= wac.) # rename wac. to WAC
+        dplyr::rename(WAC= wac.) # rename wac. to WAC
 Umu_22_func <- Umu_22_func %>% 
-       rename(swelling.index= Swelling.index) # rename wac. to WAC
+       dplyr:: rename(swelling.index= Swelling.index) # rename wac. to WAC
 
 Oto_22_func <- Oto_22_func %>% 
-       rename(WAC= wac.) # rename wac. to WAC for otobi
+        dplyr::rename(WAC= wac.) # rename wac. to WAC for otobi
 ```
 
 ```{r remove column sn and add column for year and location}
@@ -97,7 +97,7 @@ Oto_22_func <- Oto_22_func %>%
 
 Oto_22_func <- Oto_22_func %>% dplyr::select("location", "year",  "Genotype","swelling.index", "swelling.power", "WAC", "Bulk.Density") # select the needed columns
 
-Umu_22_func <- Umu_22_func %>% dplyr:: select("location", "year",  "Genotype", "swelling.index", "swelling.power", "WAC", "Bulk.Density") # select the needed columns
+Umu_22_func <- Umu_22_func %>% dplyr::select("location", "year",  "Genotype", "swelling.index", "swelling.power", "WAC", "Bulk.Density") # select the needed columns
  
 ```
 
@@ -126,25 +126,25 @@ colnames(Oto_19)
 colnames(Umu_19)
 
 Oto_19 <- Oto_19 %>% 
-       rename(Genotype= sample_id)
+        dplyr::rename(Genotype= sample_id)
 
 Umu_19 <- Umu_19 %>% 
-       rename(Genotype= Genotypes)
+        dplyr::rename(Genotype= Genotypes)
 
 Umu_19 <- Umu_19 %>% 
-       rename(Moisture = X.moisture)
+        dplyr::rename(Moisture = X.moisture)
 
 Umu_19 <- Umu_19 %>% 
-       rename(Dry.Matter =X..Dry.Matter)
+        dplyr::rename(Dry.Matter =X..Dry.Matter)
 
 Oto_19 <- Oto_19 %>% 
-       rename(swelling.index=Swelling.Index..final.initial.)
+        dplyr::rename(swelling.index=Swelling.Index..final.initial.)
 
 Oto_19 <- Oto_19 %>% 
-       rename(swelling.power= SP)
+        dplyr::rename(swelling.power= SP)
 
 Oto_19 <- Oto_19 %>% 
-       rename(Bulk.Density= Bulk.Density..g.ml.)
+        dplyr::rename(Bulk.Density= Bulk.Density..g.ml.)
 
 colnames(Oto_19)
 colnames(Umu_19)
@@ -198,9 +198,9 @@ Oto_21 <- read.csv(here::here("data", "OTOBI_2020_2021_PYT_Functional.csv"), hea
 dim(Umu_21)
 Umu_21$Genotypes <- as.factor(Umu_21$Genotypes)
 Umu_21 <- Umu_21 %>% 
-       rename(Genotype= Genotypes) # rename Genotypes to genotype
+        dplyr::rename(Genotype= Genotypes) # rename Genotypes to genotype
 Umu_21 <- Umu_21 %>% 
-       rename(swelling.index= Swelling.index)
+        dplyr::rename(swelling.index= Swelling.index)
 
 Umu_21$WAC <- as.numeric(Umu_21$WAC)
 
@@ -345,17 +345,7 @@ hist(Umu21$Bulk.Density)
 hist(Umu22$Bulk.Density)
 hist(Umu20$Bulk.Density)
 ```
-```{r run linear models for wac}
-#dat1 <- droplevels(pyt_functional_1[!is.na(pyt_functional_1$WAC),])
-library(lme4)
-dim(pyt_functional_1)
 
-```
-
-```{r}
-#All_AMYL <-  read.csv(here::here("data/PYT_chemical_data/All_years_amylose.csv"), head=T)
-#rm(All_AMYL)
-```
 
 ```{r, trait correlation}
 #trait correlation
@@ -510,7 +500,7 @@ df_lmer
 snps_dosage <- read.csv(here::here("data/snps_199_genotype.csv"), head=T)
 
 dim(snps_dosage)
-head(snps_dosage[,1:15])
+head(snps_dosage[1:4,1:15])
 snps_dosage1 <- (snps_dosage[,-1])
 head(snps_dosage1[1:5,1:5])  
 
@@ -519,13 +509,20 @@ heatmap(mt)
 
 
 #install.packages("FactoMineR")
-#library(FactoMineR)
-PCA(mt)
+library(FactoMineR)
+pc = PCA(mt)
+ds = dist(mt)
+hc = hclust(ds)
+cl = cutree(tree = hc, k = 4)
+cl = as.factor(cl)
+
+factoextra::fviz_pca_ind(pc, col.ind = "blue", addEllipses = T, habillage = cl)
 
 genotype_snps <- snps_dosage$X # get the genotype names from the snp dosage file to make it look like the names on the phenotype file
 
 write.csv(genotype_snps,file=here("genotype_snps.csv")) # Had genotype names in new order (NR17C2aF10P011)
 
+library(factoextra)
 ```
 
 ```{r import the new data frame}
@@ -700,15 +697,15 @@ lmer_mmer_sort
 ```{r merging the functional data with the chemical data}
 All_chem <- read.csv(here::here("data/PYT_chemical_data/All_years_chem.csv")) 
 dim(All_chem)
-which(All_chem$Crude.Fiber > 25)
+#which(All_chem$Crude.Fiber > 25)
 All_chem[393,"Crude.Fiber"] = NA
 
-#pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
+pyt_functional <- pyt_functional %>% dplyr::rename(Location=location, Year=year)
 pyt_functional <- pyt_functional %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
 All_chem <- All_chem %>% dplyr::mutate(combo=paste0(Location, Year, Genotype))
 str(All_chem)
-All_chem <- All_chem[-1,] #remove row 1
-All_chem <- All_chem[-1]
+
+All_chem <- All_chem[,-1]
 str(All_chem)
 
 #All_chem <- All_chem %>% dplyr::mutate(Year_n=as.factor(Year)) %>% dplyr::select(-Year) %>% rename(Year=Year_n)
@@ -835,7 +832,7 @@ library(dplyr)
 starch_sugar <- starch_sugar %>% relocate(Location, Year) # change the position of the location and year
 
 
-chem_pheno <- dplyr::full_join(chem_func2, starch_sugar, by=c("Location", "Year", "Genotype"))
+chem_pheno <- dplyr::full_join(chem_func, starch_sugar, by=c("Location", "Year", "Genotype")) #. changed chem_func2 that was initially there to chemfunc
 
 ```
 
@@ -975,16 +972,16 @@ trait= c("SI","SP", "WAC", "BD", "AMY", "CF", "STR","SUG" )
 narrow_Dat_no_outlier <- Dat_no_outlier3 %>%
   gather(key = trait, value = y, -c(Location,Year, Genotype))
 
-boxplot_Dat_no_outlier <- ggplot(data = Dat_no_outlier3, aes(x=Location,y=y, fill=trait)) +
-  geom_boxplot( stat = "boxplot",  outlier.colour = "red", outlier.shape = 16, outlier.size = 0.5, na.rm=TRUE) +
-  stat_summary(fun=mean, colour="blue", geom="point", na.rm = TRUE) +
-  labs(x= "Location", y= "Response values") + theme_bw() +
-  theme(axis.title = element_text(colour="black",face="bold", size=10),
-        plot.title = element_text(hjust = 0.5,lineheight=.5,colour="black",face="bold", size=9),
-        axis.text = element_text(face="bold", size=5), axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")+
-  facet_grid(trait~Year, scales = "free")
+#boxplot_Dat_no_outlier <- ggplot(data = Dat_no_outlier3, aes(x=Location,y=y, fill=trait)) +
+ # geom_boxplot( stat = "boxplot",  outlier.colour = "red", outlier.shape = 16, outlier.size = 0.5, na.rm=TRUE) +
+#  stat_summary(fun=mean, colour="blue", geom="point", na.rm = TRUE) +
+ # labs(x= "Location", y= "Response values") + theme_bw() +
+ # theme(axis.title = element_text(colour="black",face="bold", size=10),
+       # plot.title = element_text(hjust = 0.5,lineheight=.5,colour="black",face="bold", size=9),
+        #axis.text = element_text(face="bold", size=5), axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")+
+  #facet_grid(trait~Year, scales = "free")
 
-boxplot_Dat_no_outlier
+#boxplot_Dat_no_outlier
 
 ```
 
@@ -1138,7 +1135,7 @@ df_lmer
 
 
 
-#the best data
+#the best loop it contains lmer, mmer, boxplot, 
 ```{r function to loop all mixed models using the GA matrix for all traits using data without outliers, also made the boxplot of the physicochemical in a loop}
 traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STA", "SUG"))
 
@@ -1210,13 +1207,12 @@ filtered_value= rbind(filtered_value, Bx_2)
 
 # long format
 vcomp
-h2c 
+ 
 filtered_value$value=as.numeric(filtered_value$value)
 ggplot(filtered_value, aes(x = Location, y=value, fill=Location))+
   geom_boxplot() +
   facet_grid(trait~Year,  scales = "free")
 
-write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Heritability_lmer_mmer.csv")
 
 filtered_value$value = as.numeric(filtered_value$value)
 ddd = dcast(data = filtered_value, formula = Year + Location + Geno ~ trait, fun.aggregate = mean, value.var = "value", na.rm= T) # mean of the genotypes across location and years
@@ -1225,7 +1221,7 @@ corrplot(indv_cor, type = "upper",method = "number", number.digits = 3, is.corr 
 
 
 
-write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Variance _comp_heritability.csv")
+write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Variance _comp_heritab_3yrs.csv")
 
 
 #mean trait corr
@@ -1234,51 +1230,169 @@ write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Varian
 
 ```
 
+
+#runninng linear model for only 2021 and 2022 data
+```{r function to loop all mixed models using the GA matrix for all traits using data without outliers for only 2021 and 2022 data, also made the boxplot of the physicochemical in a loop}
+unique(Dat_no_outlier3$Year)
+New_data = droplevels(Dat_no_outlier3[Dat_no_outlier3$Year!= 2020,]) # exclude 2020 data
+
+New_data<-New_data %>% 
+  dplyr::rename(STC = STA , SC= SUG)
+ 
+
+Data6= New_data
+
+traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
+
+vcomp = tibble() # an empty table that will contains the variance components
+
+filtered_value <- tibble() # for boxplot
+# h2c = as.data.frame(h2c)
+# rownames(h2c) = traitnames
+# h2c = tibble(h2c)
+#idm = which(rownames(Gmat) %in% Dat_no_outlier2$Genotype) # which snps are found in phenotype
+#Gmat1 = Gmat[idm,idm] # subset of The GMat
+#idg = Dat_no_outlier2$Genotype %in% rownames(Gmat)# phenotype in marker
+#Dat_no_outlier3 = Dat_no_outlier2[idg,]# row numbers 
+#all(Dat_no_outlier3$Genotype %in% rownames(Gmat1))# to check if data have both phenotype and genotype
+#traitnames = traitnames[-7]
+for(traits in traitnames){
+ trs = paste0(traits) # the loop will be able to select  and analyse each trait
+ out_ind <- which(Data6[,paste(traits)] %in% boxplot.stats(Data6[,paste(traits)])$out) # outliers
+
+ if(length(out_ind) == 0){
+ Data7 = Data6
+ }else{
+ Data7 = Data6[-out_ind,] # detect outliers
+ }
+ eval(parse(text=paste(
+  "model1= mmer(",traits,"~ 1,
+     random= ~Year  + Location + Year:Location + vsr(Genotype, Gu=Gmat1) +  Genotype:Year,
+     rcov=~units, tolParInv = 0.1,
+  data=Data7)")))
+
+summary(model1)
+ss = summary(model1)
+ss = data.frame(ss$varcomp)
+vg = ss[4,"VarComp"] # assigning names to the variance component in column 1
+vgy = ss[5,"VarComp"]
+#vgl = ss[3,"VarComp"]
+ve = ss[6,"VarComp"]
+vp =  vg + vgy/2  + ve/4
+h = round(vg/vp,3)
+tt = cbind("Trait" = paste(traits), "Method" = "mmer", "vg" = round(vg,3), "vgy" = round(vgy,3), "vph" = round(vp,3), "ve" = round(ve,3), "H2" = h)
+
+rownames(tt) = paste(traits) # This will calculate the heritability of each of the traits
+
+## variance comp and h2 for lmer 
+
+eval(parse(text=paste(
+  "model2= lmer(",traits,"~ (1|Year) + (1|Location) + (1|Year:Location) 
+      + (1|Genotype) + (1|Genotype:Year),
+  data=Data7)")))
+
+
+summary(model2)
+ss1 = summary(model2)
+ss1 = data.frame(ss1$varcor)
+vg1 = ss1[ss1$grp == "Genotype","vcov"] # assigning names to the variance component in column 1
+vgy1 = ss1[ss1$grp == "Genotype:Year","vcov"]
+#vgl1 = ss1[ss1$grp == "Genotype:Location","vcov"]
+ve1 = ss1[ss1$grp == "Residual","vcov"] 
+vp1 =  vg1  + (vgy1/2)  + (ve1/4) 
+h1 = round(vg1/vp1,3)
+
+tt1 = cbind("Trait" = paste(traits), "Method" ="lmer","vg" = round(vg1,3), "vgy" = round(vgy1,3), "vph" = round(vp1,3), "ve" = round(ve1,3), H2 = h1)
+
+vccomb = rbind(tt,tt1)
+vcomp = rbind(vcomp,vccomb) # this bind the variance components to the functional properties
+
+Bx_1 <- Data7[,traits]
+Bx_2 <- cbind(Year=as.character(Data7$Year), Location=as.character(Data7$Location),Geno = as.character(Data7$Genotype), trait=paste0(traits), value=Bx_1)
+filtered_value= rbind(filtered_value, Bx_2)
+}
+
+# long format
+vcomp
+ 
+filtered_value$value=as.numeric(filtered_value$value)
+  global_size=8
+ggplot(filtered_value, aes(x = Location, y=value, fill=Location))+
+  geom_boxplot(outlier.shape = NA) +
+  facet_grid(trait~Year,  scales = "free") +
+theme_classic(base_size = global_size)
+
+filtered_value$value = as.numeric(filtered_value$value)
+ddd_new = dcast(data = filtered_value, formula = Year + Location + Geno ~ trait, fun.aggregate = mean, value.var = "value", na.rm= T) # mean of the genotypes across location and years
+indv_cor <- round(cor(ddd_new[, -c(1,2,3)],use = "pairwise.complete.obs"),3)
+corrplot(indv_cor, type = "upper",method = "number", number.digits = 3, is.corr = T)
+
+
+
+write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Variance _comp_heritability_2yrs_garri.csv")
+
+indv_cor
+#mean trait corr
+#genomean  = dcast(data = filtered_value, formula = Geno ~ trait, fun.aggregate = mean, value.var = "value", na.rm= T)
+#geno_cor <-
+
+```
+
+```{r, Looking at the distribution of starch using ggplot}
+ggplot(Data6,aes(x = Genotype, y= STC)) + 
+  geom_boxplot() + facet_grid(Year~Location )
+model <- lm(formula = STC~ Year + Location + Year:Location + Genotype + Genotype:Year + Genotype:Location, data= Data6)
+anova(model)
+library(emmeans)
+emmeans(object = model,specs = "Genotype") # looking for means
+```
+
+# genomic predictions for dataframe without 2020 data
 ```{r, genomic prediction for the chemical_functional properties of garri}
 set.seed(123)
 Acc_pred <- tibble()
-traits<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STA", "SUG"))
+traits<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
 
 library(emmeans)
 library(lme4)
-mean_Data1<- tibble()
+mean_Data7<- tibble()
 for(Trait in traits){
   eval(parse(text = paste("ansm <- lmer(",Trait,"~ (Genotype) + Location +
     (1|Year) ,
-      data= Data1)")))
+      data= Data7)")))
   em = emmeans(object = ansm, specs = ~ Genotype)
   em = as.data.frame(em)
   m2 = cbind(Trait = paste(Trait), em[,1:2])
-  mean_Data1 = rbind(mean_Data1,m2)
+  mean_Data7 = rbind(mean_Data7,m2)
 
 }
 
 library(reshape)
-Meanwide <-dcast(data = mean_Data1, formula = Genotype ~ Trait, fun.aggregate = mean,
+Meanwide1 <-dcast(data = mean_Data7, formula = Genotype ~ Trait, fun.aggregate = mean,
                  value.var = "emmean")
 #mean_Data1 <- Data1%>% group_by(Genotype) %>%
 #summarise_if(is.numeric, mean, na.rm = TRUE)
 
 for(Trait in traits) {
   # Creating a folder that contain 5 subset with 5times with a total of 5*5*8(traits)= 200
-  fold5 = caret::createMultiFolds(y = unique(Meanwide$Genotype), k = 5, times = 5)
+  fold5 = caret::createMultiFolds(y = unique(Meanwide1$Genotype), k = 5, times = 5)
 
 
   for(i in 1:length(fold5)){
     index = fold5[[i]] # the index of the sample for training set
     #subset the phenotypic data
-    train_geno <- droplevels(unique(Meanwide$Genotype)[index])
-    train_geno_ind <- which(Meanwide$Genotype %in% train_geno)
-    train.data <- droplevels(Meanwide %>%
+    train_geno <- droplevels(unique(Meanwide1$Genotype)[index])
+    train_geno_ind <- which(Meanwide1$Genotype %in% train_geno)
+    train.data <- droplevels(Meanwide1 %>%
                                filter(row_number() %in% train_geno_ind)) # subset the training set
     dim(train.data)
-    test.data <- droplevels(Meanwide %>%
+    test.data <- droplevels(Meanwide1 %>%
                               filter(!row_number() %in% train_geno_ind)) # subset the testing set
     dim(test.data)
     test.data1 <- test.data
     test.data[,traits] = NA # change the grain yield of the training set to NA value
 
-    mod_dat <- rbind(train.data, test.data) # combine the the data set for analysis
+    mod_dat1<- rbind(train.data, test.data) # combine the the data set for analysis
 
     #####################
 
@@ -1286,13 +1400,13 @@ for(Trait in traits) {
     eval(parse(text = paste("ans4 <- mmer(",Trait,"~1,
   random=~vsr(Genotype, Gu=Gmat1),
       rcov=~units,
-      data= mod_dat)")))
+      data= mod_dat1)")))
 
-    pblub = as.data.frame(ans4$U$`u:Genotype`)
-    pblub = cbind(rownames(pblub),pblub)
-    colnames(pblub)[1] = "Genotype"
-    testind = which(pblub$Genotype %in% unique(test.data$Genotype))
-    testpred = pblub[testind,]
+    pblup = as.data.frame(ans4$U$`u:Genotype`)
+    pblup = cbind(rownames(pblup),pblup)
+    colnames(pblup)[1] = "Genotype"
+    testind = which(pblup$Genotype %in% unique(test.data$Genotype))
+    testpred = pblup[testind,]
     testpred$Genotype %in% unique(test.data$Genotype)
     testpred = testpred[order(testpred$Genotype),]
 
@@ -1312,10 +1426,157 @@ ggplot(Acc_pred, mapping = aes(x = Trait, y = predictability, fill = Trait)) +
   geom_boxplot() + theme_bw()
 
 
+```
 
-ggplot()
+
+
+
+
+```{r model of two years data with the full model}
+traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
+
+vcomp = tibble() # an empty table that will contains the variance components
+
+filtered_value <- tibble() # for boxplot
+# h2c = as.data.frame(h2c)
+# rownames(h2c) = traitnames
+# h2c = tibble(h2c)
+#idm = which(rownames(Gmat) %in% Dat_no_outlier2$Genotype) # which snps are found in phenotype
+#Gmat1 = Gmat[idm,idm] # subset of The GMat
+#idg = Dat_no_outlier2$Genotype %in% rownames(Gmat)# phenotype in marker
+#Dat_no_outlier3 = Dat_no_outlier2[idg,]# row numbers 
+#all(Dat_no_outlier3$Genotype %in% rownames(Gmat1))# to check if data have both phenotype and genotype
+#traitnames = traitnames[-7]
+for(traits in traitnames){
+ trs = paste0(traits) # the loop will be able to select  and analyse each trait
+ out_ind <- which(Data6[,paste(traits)] %in% boxplot.stats(Data6[,paste(traits)])$out) # outliers
+
+ if(length(out_ind) == 0){
+ Data7 = Data6
+ }else{
+ Data7 = Data6[-out_ind,] # detect outliers
+ }
+ eval(parse(text=paste(
+  "model1= mmer(",traits,"~ 1,
+     random= ~Year  + Location + Year:Location + vsr(Genotype, Gu=Gmat1) +  Genotype:Year + Genotype: Location,
+     rcov=~units, tolParInv = 0.1,
+  data=Data7)")))
+
+summary(model1)
+ss = summary(model1)
+ss = data.frame(ss$varcomp)
+
+vg = ss[4,"VarComp"] # assigning names to the variance component in column 1
+vgy = ss[5,"VarComp"]
+vgl = ss[6,"VarComp"]
+ve = ss[7,"VarComp"]
+vp =  vg + vgy/2+vgl/2 + ve/4
+h = round(vg/vp,3)
+tt = cbind("Trait" = paste(traits), "Method" = "mmer", "vg" = round(vg,3),"vgl"=round(vgl,3), "vgy" = round(vgy,3), "vph" = round(vp,3), "ve" = round(ve,3), "H2" = h)
+
+rownames(tt) = paste(traits) # This will calculate the heritability of each of the traits
+
+## variance comp and h2 for lmer 
+
+eval(parse(text=paste(
+  "model2= lmer(",traits,"~ (1|Year) + (1|Location) + (1|Year:Location) +
+       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+  data=Data7)")))
+
+
+summary(model2)
+ss1 = summary(model2)
+ss1 = data.frame(ss1$varcor)
+vg1 = ss1[ss1$grp == "Genotype","vcov"] # assigning names to the variance component in column 1
+vgy1 = ss1[ss1$grp == "Genotype:Year","vcov"]
+vgl1 = ss1[ss1$grp == "Genotype:Location","vcov"]
+ve1 = ss1[ss1$grp == "Residual","vcov"] 
+vp1 =  vg1  + (vgy1/2) +vgl1/2 + (ve1/4) 
+h1 = round(vg1/vp1,3)
+
+tt1 = cbind("Trait" = paste(traits), "Method" ="lmer","vg" = round(vg1,3), "vgl"=round(vgl1,3), "vgy" = round(vgy1,3), "vph" = round(vp1,3), "ve" = round(ve1,3), H2 = h1)
+
+vccomb = rbind(tt,tt1)
+vcomp = rbind(vcomp,vccomb) # this bind the variance components to the functional properties
+
+Bx_1 <- Data7[,traits]
+Bx_2 <- cbind(Year=as.character(Data7$Year), Location=as.character(Data7$Location),Geno = as.character(Data7$Genotype), trait=paste0(traits), value=Bx_1)
+filtered_value= rbind(filtered_value, Bx_2)
+}
+
+# long format
+vcomp
+write.csv(x=vcomp,file = "~/Documents/ChinedoziRepo/GarriQuality/output/H2_garri_full_model.csv")
+```
+```{r}
+#Predict the BLUEs for garri
+library(emmeans)
+traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
+BLUEMean = tibble()
+for(traits in traitnames){
+eval(parse(text = paste("model1= lmer(",traits,"~ (1|Year)  + (1|Location) + (1|Year:Location) + Genotype +  (1|Genotype:Year) + (1|Genotype: Location),
+  data=Data7)")))
+ em1 = as.data.frame(emmeans(object = model1, specs = "Genotype"))
+ 
+em2 = cbind(Trait = traits,em1[,1:2])
+BLUEMean = rbind(BLUEMean, em2)
+}
+head(BLUEMean)
+library(reshape2)
+BLUEMeanWide = dcast(data = BLUEMean, formula = Genotype ~ Trait, fun.aggregate = mean, value.var = "emmean")
+head(BLUEMeanWide)
+BLUEMeanWide = as.data.frame(BLUEMeanWide)
+rownames(BLUEMeanWide) <- BLUEMeanWide$Genotype
+pc1 = PCA(X = BLUEMeanWide[,-1], scale.unit = T  )
+factoextra::fviz_pca_ind(pc1,  labelsize = 1)
+
+
+fviz_pca_biplot(X = pc1, labelsize =1,arrowsize = 0.2, pointsize = 0.5, col.var = "red")
 
 ```
+
+```{r, genetic correlation}
+install.packages("biotools")
+library(biotools)
+
+garri_mano = manova(cbind(SI,SP, WAC, BD, AMY,CF, STC, SC)~Year + Location + Year:Location +
+      Genotype + Genotype:Year + Genotype:Location,
+  data=Data7)
+garri_gencov <- gencovtest(obj = garri_mano,geneticFactor = "Genotype")
+diag(garri_gencov$gcov)
+garri_gencov$gcor
+#####
+# sommer
+
+mrc1 = mmer(fixed = cbind(WAC, SC) ~ 1, 
+     random = ~ Year:Location +
+       Genotype + Genotype:Year + Genotype:Location, 
+     rcov = ~units, data = Data7)
+ss = summary(mrc1)
+ss$varcomp
+2.374/(sqrt(69.8*0.00231))
+for(i in traitnames){
+  for(j in traitnames){
+    
+mod1= lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
+       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+  data=Data7)
+mod2= lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
+       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+  data=Data7)
+modlxy = lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
+       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+  data=Data7)
+
+ }
+  }
+
+All_dmc1 = ALL_DMC %>% group_by(Location, Year, Genotype) %>%
+ 
+
+```
+
+
 
 
 

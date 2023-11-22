@@ -196,6 +196,11 @@ summary(Umu20)
 summary(Umu21)
 summary(Umu22)
 
+
+#INSERT STARCH AND FREE SUGAR
+umu_20_Starch_Sugar <-
+
+
 # r making a function to run the mixed model for all the traits without removing outliers
 traitname<- (c("swelling.index","swelling.power", "WAC", "Bulk.Density")) # matrix of column names
 

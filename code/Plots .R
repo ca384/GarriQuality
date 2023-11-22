@@ -101,6 +101,27 @@ ggsave("output/boxplot_env_trait.jpeg",height=5, width=8, units="in", dpi=300)
 print(boxplot_env_trait3)
 
 
+## corr plot using data without outlier
+
+corr_functional_Dat_no_na <-DatWithout_na2[,-c(1:3)]
+
+corr_func_no_na <- cor(corr_functional_no_na,  use="complete.obs") # correlation
+# correlation
+corr_func_no_na
+#pairs(corr_func)
+
+library(corrplot)
+corr1 <- cor(corr_functional_Dat_no_na,use = "pairwise.complete.obs")
+cor_chem_func_Dat_noNa <- corrplot(corr1, method = "number",type = "upper",order = "alphabet", is.corr = TRUE)
+
+
+covar_functional  <- cov(corr_functional, use="complete.obs")
+covar_functional
+write.csv(corr_functional,file=here("./output/correlation_functional_all_year.csv"))
+
+# plot using the chem_func1 that contins all the chemical data
+
+
 chem_func2 <-chem_func %>% dplyr::select(c( "Location","Year","Genotype", "swelling.index","swelling.power","WAC", "Bulk.Density","Amylose","Crude.Fiber"))
 chem_func2$Location <- as.factor(chem_func2$Location)
 str(chem_func2)
@@ -122,3 +143,8 @@ ggplot(data = chem_func2,aes(x=Year,y=Crude.Fiber,fill=Location))+
 
 ggplot(data = chem_func2,aes(x=Year,y= Amylose,fill=Location))+
   geom_boxplot()
+
+# preparing data for GGE
+# transpose the Dat_no_outlier3
+#transpose_Dat <- t(Dat_no_outlier3)
+#dim(transpose_Dat)

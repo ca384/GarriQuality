@@ -1,4 +1,4 @@
-packages_used <- c("workflowr", "tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR","corrplot")
+packages_used <- c("workflowr", "tidyverse", "ggplot2", "here", "stringr" , "sommer","lme4","metan", "rrBLUP","FactoMineR","corrplot","factoextra", "ASRgenomics", "GGEBiplots")
 ip <- installed.packages()
 all_packages_installed <- TRUE
 for (package in packages_used){
