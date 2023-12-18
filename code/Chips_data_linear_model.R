@@ -52,6 +52,21 @@ dd_no_snp = chips_all[-XXX,] # data frame without the snps data
 dim(dd_no_snp)
 unique(dd_no_snp$Genotype)
 
+
+snp_numberd_ch = snps_filter_new
+rownames(snp_numberd_ch) <- 1:196
+snpsc_ch = scale(snp_numberd_ch, scale = T)
+pc_ch = PCA(snp_numberd_ch,scale.unit = T)# pca of chips
+
+ds_ch = dist(snpsc_ch)# distance of snps
+hc_ch = hclust(ds_ch)# hierarchy cluster of cassava chips snps data
+plot(hc_ch, hang = -1)
+cl_ch = cutree(tree = hc_ch, k = 5)
+cl_ch = as.factor(cl_ch)
+factoextra::fviz_pca_ind(pc_ch,
+                         col.ind = "blue", addEllipses = F, habillage = cl_ch)
+
+
 #yyy <- which(rownames(snpsFilter) %in% All_chips_data$Genotype)
 #unique(All_chips_data$Genotype[XXX]) %in% unique(rownames(snpsFilter)[yyy])
 length(unique(chips_all$Genotype))
@@ -191,8 +206,6 @@ filtered_value_new <- tibble() # for boxplot
   #  facet_grid(trait~Year,  scales = "free")
 
 
-
-
   filtered_value_new$value=as.numeric(filtered_value_new$value)
   filtered_value_new$Year= as.factor( filtered_value_new$Year)
   filtered_value_new$Geno= as.factor( filtered_value_new$Geno)
@@ -261,8 +274,6 @@ library(reshape2)
   Meanwide3 = Meanwide3[idphn,]
   all(unique(Meanwide3$Genotype) %in% rownames(Gmat3))
 
-
-
   for(Trait in traits) {
     # Creating a folder that contain 5 subset with 5times with a total of 5*5*8(traits)= 200
     fold5 = caret::createMultiFolds(y = unique(Meanwide3$Genotype), k = 5, times = 5)
@@ -324,15 +335,13 @@ str(Acc_pred_n)
 
 #####################################
 #combining garri and chips on a single data frame
-  #Data7 is the data frame containing the garri data
+  #Data7 is the data frame containing the garri data from line 1264 linear-model_garri_quality
   # Data1 contains the chips data
 
   garri_chips<-Data_new%>%
-                     full_join(Data1, by = c("Location", "Year", "Genotype") )
-colnames(garri_chips)
+                     full_join(Data7, by = c("Location", "Year", "Genotype") )
 
-
-length(Data1$Genotype %in% Data_new$Genotype)
+length(Data7$Genotype %in% Data_new$Genotype)
 length(Data_new$Genotype %in% Data1$Genotype)
 garri_chips2<- garri_chips %>%
   dplyr::select("Location", "Year", "Genotype","SI" , "SP", "WAC", "BD", "AMY", "CF", "STC","SC","AMY_ch","CF_ch","STC_ch","SC_ch", "DMC" )
@@ -345,17 +354,18 @@ summary_stat_ch_dm=summary(garri_chips2)
 write.csv(x =summary_stat_ch_dm, file = "~/Documents/ChinedoziRepo/GarriQuality/output/summary_stat_chips_dm")
 
 
-r1 = cor(garri_chips2[,-c(1:3)], use = "pairwise.complete.obs")
-corrplot.mixed(r1, type ="full"  ,method = "number", number.digits = 2,
-         is.corr = T,  cl.cex = 0.5, tl.cex = 0.5, number.font = 0.01,number.cex = 0.6, addshade = c("negative", "positive", "all"))
-r2= correlation(x=garri_chips_dmc[,-c(1:3,13:16)], y=NULL,
-           method = "pearson",
-           alternative ="two.sided")
+# r1 = cor(garri_chips2[,-c(1:3)], use = "pairwise.complete.obs")
+# corrplot.mixed(r1, type ="full"  ,method = "number", number.digits = 2,
+#          is.corr = T,  cl.cex = 0.5, tl.cex = 0.5, number.font = 0.01,number.cex = 0.6, addshade = c("negative", "positive", "all"))
+# r2= correlation(x=garri_chips2[,-c(1:3,13:16)], y=NULL,
+#            method = "pearson",
+#            alternative ="two.sided")
 
 write.csv(x =r2, file = "~/Documents/ChinedoziRepo/GarriQuality/output/correlation_chips_matrix.csv")
 
 out_cf <- which(garri_chips2$CF %in% boxplot.stats(garri_chips2$CF)$out)
 garri_chips2[out_cf, "CF"] = NA # make outlier NA
+
 library(psych)
 
 
@@ -364,7 +374,7 @@ pairs.panels(garri_chips2[,-c(1:3)],   # plot distributions and correlations for
              pch = ".",
              cex = 1.5,
              lm = TRUE,
-             ellipses=FALSE,stars = TRUE)
+             ellipses=FALSE,stars = TRUE, method = "pearson")
 
 
 
@@ -454,9 +464,6 @@ write.csv(Mean_GC2, "/Users/ca384/Documents/ChinedoziRepo/GarriQuality/output/tr
 Mean_GC2 <- garri_chips_dmc2 %>% group_by(Genotype) %>% summarise_at(.vars = c( "DMC", "AMY_ch","CF_ch","STC_ch","SC_ch"), .funs = mean, na.rm=T)
 library (reshape2)
 
-
-
-
 wide_mean_data2 <- dcast(data = mean_Data2, formula = Genotype~ Trait,fun.aggregate = mean,value.var = "emmean" ) # long to wide format
 
 
@@ -496,53 +503,70 @@ tr1$tr1 = as.factor(tr1$tr1)
  h11$tree_row$labels
 
  # kmean clustering
- ?kmeans
-id =  rownames(Mean_GC1) %in% rownames(tr1)
-Mean_GCK = Mean_GC1[id,]
- kk = kmeans(Mean_GCK, centers = 4)
- kk$cluster # cluster number
- kk$centers # the mean value of the clusters
+#  ?kmeans
+# id =  rownames(Mean_GC1) %in% rownames(tr1)
+# Mean_GCK = Mean_GC1[id,]
+#  kk = kmeans(Mean_GCK, centers = 4)
+#  kk$cluster # cluster number
+#  kk$centers # the mean value of the clusters
 
  ## dendorogram
- Mean192 = Mean_GC[id,]
- ?scale
- Mean1
- Mean192S = scale(x = Mean192[,-1], scale = T)
- disk = dist(Mean192S)
-
- hc192 = hclust(disk, method = "ward.D")
- hc192$labels
- plot(hc192, hang = -1, labels = F)
-
+ # Mean192 = Mean_GC[id,]
+ # ?scale
+ # Mean1
+ # Mean192S = scale(x = Mean192[,-1], scale = T)
+ # disk = dist(Mean192S)
+ #
+ # hc192 = hclust(disk, method = "ward.D")
+ # hc192$labels
+ # plot(hc192, hang = -1, labels = F)
+ #
 
 ####################################
 
  #Predict the BLUEs for chips
  library(emmeans)
  traitnames<- (c( "DMC", "STC_ch", "AMY_ch", "CF_ch", "SC_ch") )
- BLUEMean = tibble()
+ BLUEMean_ch = tibble()
  for(traits in traitnames){
    eval(parse(text = paste("model_ch= lmer(",traits,"~ (1|Year)  + (1|Location) + (1|Year:Location) + Genotype +  (1|Genotype:Year) + (1|Genotype: Location),
   data=Data_new)")))
-   em1 = as.data.frame(emmeans(object = model_ch, specs = "Genotype"))
+   em1_ch = as.data.frame(emmeans(object = model_ch, specs = "Genotype"))
 
-   em2 = cbind(Trait = traits,em1[,1:2])
-   BLUEMean = rbind(BLUEMean, em2)
+   em2_ch = cbind(Trait = traits,em1_ch[,1:2])
+   BLUEMean_ch = rbind(BLUEMean_ch, em2_ch)
  }
- head(BLUEMean)
+ head(BLUEMean_ch)
  library(reshape2)
- BLUEMeanWide = dcast(data = BLUEMean, formula = Genotype ~ Trait, fun.aggregate = mean, value.var = "emmean")
- head(BLUEMeanWide)
- BLUEMeanWide = as.data.frame(BLUEMeanWide)
- rownames(BLUEMeanWide) <- BLUEMeanWide$Genotype
- pc_Ch = PCA(X = BLUEMeanWide[,-1], scale.unit = T  )
- factoextra::fviz_pca_ind( pc_Ch,cex=0.75,  labelsize = 1)
+ BLUEMeanWide_ch = dcast(data = BLUEMean_ch, formula = Genotype ~ Trait, fun.aggregate = mean, value.var = "emmean")
+ head(BLUEMeanWide_ch)
+ BLUEMeanWide_ch = as.data.frame(BLUEMeanWide_ch)
+ rownames(BLUEMeanWide_ch) <- BLUEMeanWide_ch$Genotype
+ #gsub(pattern = )
+ gc_ch = c()
+ for(i in 1:193){
+ idx = paste(c("G",i), collapse = "")
+ gc_ch = c(gc_ch,idx)
+ }
+ BLUEMeanWide_ch$Gcode = gc_ch
+ rownames(BLUEMeanWide_ch) <- BLUEMeanWide_ch$Gcode
+ pc_Ch = PCA(X = BLUEMeanWide_ch[,-c(1,7)], scale.unit = T  )
+ factoextra::fviz_pca_ind( pc_Ch,cex=0.8,  labelsize = 1)
 
 
- fviz_pca_biplot(X = pc_Ch, labelsize =1,arrowsize = 0.3, pointsize = 0.3, col.var = "red")
- pc_Ch$svd
+ fviz_pca_biplot(X = pc_Ch,labelsize= 2, arrowsize = 0.3,
+                 pointsize = 0.1, col.var = "red") +
+   theme(text = element_text(size = 10))
 
- pc_Ch$var$coord
+ write.csv(x = BLUEMeanWide_ch[,c(1,7)], file = "/Users/ca384/Documents/ChinedoziRepo/GarriQuality/output/Chips_genotype_code.csv",row.names = F)
+
+ pc_Ch$svd # pcplot
+
+ pc_Ch$var$coord # looking for the cordinates
  pc_Ch$ind$coord
  pcsum = summary(pc_Ch)
  pcsum
+
+ print(citation("ggplot2"), style = "text")
+ print(citation("tidyverse"), style = "text")
+ print(citation("factoextra"), style = "text")

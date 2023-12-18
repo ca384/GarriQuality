@@ -149,8 +149,8 @@ cl = as.data.frame(cl)
 cl$cl = as.factor(cl$cl)
 summary(cl)
 cl = as.factor(cl)
-factoextra::fviz_pca_ind(pc,
-                         col.ind = "blue", addEllipses = T, habillage = cl)
+#factoextra::fviz_pca_ind(pc,
+                         #col.ind = "blue", addEllipses = T, habillage = cl)
 
 ######
 #To see the genotypes that are present in each cluster
@@ -250,39 +250,34 @@ head(gen_cls)
 
 
 
-
-
-
-
-
 ## heritability with cluster
 ord_cls_phen
 str(ord_cls_phen)
 ord_cls_phen$Geno = as.factor(ord_cls_phen$Geno)
 ord_cls_phen$Cluster = as.factor(ord_cls_phen$Cluster)
 Env = levels(ord_cls_phen$Cluster)
-Traits = colnames(ord_cls_phen[-c(1:3)])
-hert = tibble()
-for(env in Env){
-  phcl = ord_cls_phen[ord_cls_phen$Cluster== env,]
-  for(Trait in Traits){
-    eval(parse(text = paste("modelcl= mmer(",Trait,"~  1,
-             random=~ vsr(Geno, Gu=Gmat2),
-             rcov=~units,
-             data=phcl)")))
-    ss = summary(modelcl)
-    vc = ss$varcomp
-
-    gv = vc[1,"VarComp"]
-    ve = vc[2,"VarComp"]
-    h2 = gv/(gv +ve)
-    h2= cbind("Cluster" = paste(env), "Trait" = paste(Trait),
-                 "Heritability" = round(h2,3))
-    hert = rbind(hert,h2)
-  }
-}
-
-write.csv(x = hert, file = "Heritability_of_clusters.csv", row.names = T)
+# Traits = colnames(ord_cls_phen[-c(1:3)])
+# hert = tibble()
+# for(env in Env){
+#   phcl = ord_cls_phen[ord_cls_phen$Cluster== env,]
+#   for(Trait in Traits){
+#     eval(parse(text = paste("modelcl= mmer(",Trait,"~  1,
+#              random=~ vsr(Geno, Gu=Gmat2),
+#              rcov=~units,
+#              data=phcl)")))
+#     ss = summary(modelcl)
+#     vc = ss$varcomp
+#
+#     gv = vc[1,"VarComp"]
+#     ve = vc[2,"VarComp"]
+#     h2 = gv/(gv +ve)
+#     h2= cbind("Cluster" = paste(env), "Trait" = paste(Trait),
+#                  "Heritability" = round(h2,3))
+#     hert = rbind(hert,h2)
+#   }
+# }
+#
+# write.csv(x = hert, file = "Heritability_of_clusters.csv", row.names = T)
 
 
 #PCA plot with snps and phenotype
@@ -298,21 +293,8 @@ fviz_pca_biplot(X = pcph,geom.ind = "point" ,
 ######## for chips data
 Data_new
 
-snp_numberd_ch = snps_filter_new
-rownames(snp_numberd_ch) <- 1:196
-snpsc_ch = scale(snp_numberd_ch, scale = T)
-pc_ch = PCA(snp_numberd_ch,scale.unit = T)# pca of chips
-
-ds_ch = dist(snpsc_ch)# distance of snps
-hc_ch = hclust(ds_ch)# hierarchy cluster of cassava chips snps data
-plot(hc_ch, hang = -1)
-cl_ch = cutree(tree = hc_ch, k = 5)
-cl_ch = as.factor(cl_ch)
-factoextra::fviz_pca_ind(pc_ch,
-                         col.ind = "blue", addEllipses = F, habillage = cl_ch)
 
 kmeans()
-
 head(Data_new)
 mean_Dat_new = Data_new %>% group_by(Genotype) %>%
   summarise_at(.vars = c("AMY_Ch",     "CF_Ch",
@@ -349,42 +331,36 @@ write.csv(x = ord_cls_phen_ordbyclt_ch, file = "genotype_cluster_chips.csv", row
 gncl_ch = read.csv("genotype_cluster_chips.csv")
 head(gncl_ch)
 
-
 ## heritability with cluster for chips
-str(ord_cls_phen_ch)
-ord_cls_phen_ch$Cluster = as.factor(ord_cls_phen_ch$Cluster)
-Env = levels(ord_cls_phen_ch$Cluster)
-Traits = colnames(ord_cls_phen_ch[-c(1:3)])
-hert_ch = tibble()
-for(env in Env){
-  phcl_ch = ord_cls_phen_ch[ord_cls_phen_ch$Cluster== env,]
-  for(Trait in Traits){
-    eval(parse(text = paste("modelcl_ch= mmer(",Trait,"~  1,
-             random=~ vsr(Genotype, Gu=Gmat3),
-             rcov=~units,
-             data=phcl_ch)")))
-    ss = summary(modelcl_ch)
-    vc = ss$varcomp
-
-    gv = vc[1,"VarComp"]
-    ve = vc[2,"VarComp"]
-    h2 = gv/(gv +ve)
-    h2= cbind("Cluster" = paste(env), "Trait" = paste(Trait),
-              "Heritability" = round(h2,3))
-    hert_ch = rbind(hert_ch,h2)
-  }
-}
-hert_ch
-write.csv(x = hert_ch, file = "Heritability_of_clusters_ch.csv", row.names = T)
-
-
-#PCA plot with snps and phenotype
-
-mean_Dat_new_ord_df = as.data.frame(mean_Dat_new_ord)
-rownames(mean_Dat_new_ord_df) = mean_Dat_new_ord_df$Genotype
-pcph_ch = PCA(X = mean_Dat_new_ord_df[,-1], scale.unit = T)
-
-fviz_pca_biplot(X = pcph_ch,geom.ind = "point" ,
-                col.ind = ord_cls_phen_ch$Cluster)
+# for(env in Env){
+#   phcl_ch = ord_cls_phen_ch[ord_cls_phen_ch$Cluster== env,]
+#   for(Trait in Traits){
+#     eval(parse(text = paste("modelcl_ch= mmer(",Trait,"~  1,
+#              random=~ vsr(Genotype, Gu=Gmat3),
+#              rcov=~units,
+#              data=phcl_ch)")))
+#     ss = summary(modelcl_ch)
+#     vc = ss$varcomp
+#
+#     gv = vc[1,"VarComp"]
+#     ve = vc[2,"VarComp"]
+#     h2 = gv/(gv +ve)
+#     h2= cbind("Cluster" = paste(env), "Trait" = paste(Trait),
+#               "Heritability" = round(h2,3))
+#     hert_ch = rbind(hert_ch,h2)
+#   }
+# }
+# hert_ch
+# write.csv(x = hert_ch, file = "Heritability_of_clusters_ch.csv", row.names = T)
+#
+#
+# #PCA plot with snps and phenotype
+#
+# mean_Dat_new_ord_df = as.data.frame(mean_Dat_new_ord)
+# rownames(mean_Dat_new_ord_df) = mean_Dat_new_ord_df$Genotype
+# pcph_ch = PCA(X = mean_Dat_new_ord_df[,-1], scale.unit = T)
+#
+# fviz_pca_biplot(X = pcph_ch,geom.ind = "point" ,
+#                 col.ind = ord_cls_phen_ch$Cluster)
 
 

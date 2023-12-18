@@ -1041,7 +1041,7 @@ length(levels(phen_new1$Genotype))
 all(rownames(snp3) %in% phen_new1$Genotype)
 ```
 
-```{r script from moshood to clean up the snps file using the ASRgenomics}
+```{r script to clean up the snps file using the ASRgenomics}
 #A1 <- rrBLUP::A.mat(snp2[,-1])
 snps_dosage1 <- snps_dosage[,-1]
 snps_dosage1 <- as.data.frame(snps_dosage1)
@@ -1239,7 +1239,6 @@ New_data = droplevels(Dat_no_outlier3[Dat_no_outlier3$Year!= 2020,]) # exclude 2
 New_data<-New_data %>% 
   dplyr::rename(STC = STA , SC= SUG)
  
-
 Data6= New_data
 
 traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
@@ -1257,7 +1256,7 @@ filtered_value <- tibble() # for boxplot
 #all(Dat_no_outlier3$Genotype %in% rownames(Gmat1))# to check if data have both phenotype and genotype
 #traitnames = traitnames[-7]
 for(traits in traitnames){
- trs = paste0(traits) # the loop will be able to select  and analyse each trait
+ trs = paste0(traits) # the loop will be able to select  and analyze each trait
  out_ind <- which(Data6[,paste(traits)] %in% boxplot.stats(Data6[,paste(traits)])$out) # outliers
 
  if(length(out_ind) == 0){
@@ -1291,7 +1290,6 @@ eval(parse(text=paste(
       + (1|Genotype) + (1|Genotype:Year),
   data=Data7)")))
 
-
 summary(model2)
 ss1 = summary(model2)
 ss1 = data.frame(ss1$varcor)
@@ -1314,7 +1312,7 @@ filtered_value= rbind(filtered_value, Bx_2)
 
 # long format
 vcomp
- 
+ #making a boxplot with all the years, locations  and traits a
 filtered_value$value=as.numeric(filtered_value$value)
   global_size=8
 ggplot(filtered_value, aes(x = Location, y=value, fill=Location))+
@@ -1322,11 +1320,11 @@ ggplot(filtered_value, aes(x = Location, y=value, fill=Location))+
   facet_grid(trait~Year,  scales = "free") +
 theme_classic(base_size = global_size)
 
+# changing the for correlation. using the mean to make correlation
 filtered_value$value = as.numeric(filtered_value$value)
 ddd_new = dcast(data = filtered_value, formula = Year + Location + Geno ~ trait, fun.aggregate = mean, value.var = "value", na.rm= T) # mean of the genotypes across location and years
 indv_cor <- round(cor(ddd_new[, -c(1,2,3)],use = "pairwise.complete.obs"),3)
 corrplot(indv_cor, type = "upper",method = "number", number.digits = 3, is.corr = T)
-
 
 
 write.csv(x =vcomp, file = "~/Documents/ChinedoziRepo/GarriQuality/output/Variance _comp_heritability_2yrs_garri.csv")
@@ -1338,7 +1336,7 @@ indv_cor
 
 ```
 
-```{r, Looking at the distribution of starch using ggplot}
+```{r, Not so important: Looking at the distribution of starch using ggplot}
 ggplot(Data6,aes(x = Genotype, y= STC)) + 
   geom_boxplot() + facet_grid(Year~Location )
 model <- lm(formula = STC~ Year + Location + Year:Location + Genotype + Genotype:Year + Genotype:Location, data= Data6)
@@ -1359,19 +1357,20 @@ mean_Data7<- tibble()
 for(Trait in traits){
   eval(parse(text = paste("ansm <- lmer(",Trait,"~ (Genotype) + Location +
     (1|Year) ,
-      data= Data7)")))
-  em = emmeans(object = ansm, specs = ~ Genotype)
+      data= Data7)"))) # we used the main data for the GS model
+  em = emmeans(object = ansm, specs = ~ Genotype) # get the output means of the genotype
   em = as.data.frame(em)
   m2 = cbind(Trait = paste(Trait), em[,1:2])
-  mean_Data7 = rbind(mean_Data7,m2)
+  mean_Data7 = rbind(mean_Data7,m2) 
 
 }
 
 library(reshape)
 Meanwide1 <-dcast(data = mean_Data7, formula = Genotype ~ Trait, fun.aggregate = mean,
-                 value.var = "emmean")
+                 value.var = "emmean") # change the format of the mean_Data7
 #mean_Data1 <- Data1%>% group_by(Genotype) %>%
 #summarise_if(is.numeric, mean, na.rm = TRUE)
+
 
 for(Trait in traits) {
   # Creating a folder that contain 5 subset with 5times with a total of 5*5*8(traits)= 200
@@ -1380,7 +1379,7 @@ for(Trait in traits) {
 
   for(i in 1:length(fold5)){
     index = fold5[[i]] # the index of the sample for training set
-    #subset the phenotypic data
+    #subset the phenotypic data, 
     train_geno <- droplevels(unique(Meanwide1$Genotype)[index])
     train_geno_ind <- which(Meanwide1$Genotype %in% train_geno)
     train.data <- droplevels(Meanwide1 %>%
@@ -1424,6 +1423,139 @@ for(Trait in traits) {
 Acc_pred$predictability= as.numeric(Acc_pred$predictability)
 ggplot(Acc_pred, mapping = aes(x = Trait, y = predictability, fill = Trait)) +
   geom_boxplot() + theme_bw()
+
+
+```
+
+
+```{r, genomic prediction for the chemical_functional properties of garri using genomicMate}
+
+# set.seed(123)
+# Acc_pred <- tibble()
+# traits<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
+# 
+# library(emmeans)
+# library(lme4)
+# 
+# library(sommer)
+# BLUPS_traits = tibble()
+# traitnames1 = traitnames[!traitnames %in% "CF"]
+# for(Trait in traitnames1){
+#   
+# eval(parse(text = paste( "ansb <- mmer(fixed = ",Trait,"~ Year + Location, 
+#              random = ~ Genotype,
+#              rcov = ~units,
+#              getPEV = TRUE,
+#              data= Data7)")))
+# 
+# Vg = ansb$sigma$Genotype
+# ve = ansb$sigma$units
+# H2 = Vg/(Vg +(ve/(3*2)))
+# blups<-ansb$U$Genotype[[Trait]] %>% 
+#      tibble(Genotype=names(.),BLUP=.) %>% 
+#      mutate(Genotype=gsub("Genotype","",Genotype),
+#             # prediction error variance
+#             PEV=diag(ansb$PevU$Genotype[[Trait]]), 
+#             
+#             REL=1-PEV/Vg, # Reliability
+#             drgBLUP=BLUP/REL, # De-regressed BLUP
+#             WT=(1-H2)/((0.1 + (1-REL)/REL)*H2))
+# blups1 = cbind(Trait = Trait, blups)
+#  BLUPS_traits = rbind(BLUPS_traits, blups1)           
+# 
+# }
+# 
+# BLUPS_traits[BLUPS_traits$Trait == "CF",]
+# idmt = which(rownames(Gmat1) %in%  blups$Genotype)
+# Gmat_dg = Gmat1[idmt, idmt]
+# all(rownames(Gmat_dg) %in% blups$Genotype)
+#       
+# # gblup_all<-mmer(fixed = drgBLUP~1,
+# #                 # here we specify a random-effect for the "germplasmName" variable
+# #                 # and supply the kinship matrix "A" as follows:
+# #                 random = ~vs(Genotype,Gu=Gmat_dg),
+# #                 weights = WT,
+# #                 data=blups) # use for later analysis
+# #   
+# # r = cor(gblup_all$U$`u:Genotype`$drgBLUP, blups$drgBLUP)      
+#       
+#       
+# 
+# 
+# # mean_Data7<- tibble()
+# # for(Trait in traits){
+# #   eval(parse(text = paste("ansm <- lmer(",Trait,"~ (Genotype) + Location +
+# #     (1|Year) ,
+# #       data= Data7)"))) # we used the main data for the GS model
+# #   em = emmeans(object = ansm, specs = ~ Genotype) # get the output means of the genotype
+# #   em = as.data.frame(em)
+# #   m2 = cbind(Trait = paste(Trait), em[,1:2])
+# #   mean_Data7 = rbind(mean_Data7,m2) 
+# # 
+# # }
+# 
+# library(reshape)
+# # Meanwide1 <-dcast(data = mean_Data7, formula = Genotype ~ Trait, fun.aggregate = mean,
+# #                  value.var = "emmean") # change the format of the mean_Data7
+# # #mean_Data1 <- Data1%>% group_by(Genotype) %>%
+# # #summarise_if(is.numeric, mean, na.rm = TRUE)
+# 
+# 
+# # for(Trait in traits) {
+#   # Creating a folder that contain 5 subset with 5times with a total of 5*5*8(traits)= 200
+# Acc_pred = tibble()
+# head(BLUPS_traits)
+# for(Trait in traitnames1){
+# blups <- BLUPS_traits[BLUPS_traits$Trait == Trait,]
+#   fold5 = caret::createMultiFolds(y = unique(blups$Genotype), k = 5, times = 5)
+# 
+# 
+#   for(i in 1:length(fold5)){
+#     index = fold5[[i]] # the index of the sample for training set
+#     #subset the phenotypic data, 
+#     train_geno <- unique(blups$Genotype)[index]
+#     train_geno_ind <- which(blups$Genotype %in% train_geno)
+#     train.data <- droplevels(blups %>%
+#                                filter(row_number() %in% train_geno_ind)) # subset the training set
+#     dim(train.data)
+#     test.data <- droplevels(blups %>%
+#                               filter(!row_number() %in% train_geno_ind)) # subset the testing set
+#     dim(test.data)
+#     test.data1 <- test.data
+#     test.data[,"drgBLUP"] = NA # change the grain yield of the training set to NA value
+# 
+#     mod_dat1<- rbind(train.data, test.data) # combine the the data set for analysis
+# 
+#     #####################
+# 
+# 
+#     eval(parse(text = paste("ans4<-mmer(fixed = drgBLUP~1,
+#             random = ~vs(Genotype,Gu=Gmat_dg),
+#                 weights = WT,
+#                 data=mod_dat1) # use for later analysis   ")))
+# 
+#     pblup = as.data.frame(ans4$U$`u:Genotype`)
+#     pblup = cbind(rownames(pblup),pblup)
+#     colnames(pblup)[1] = "Genotype"
+#     testind = which(pblup$Genotype %in% unique(test.data$Genotype))
+#     testpred = pblup[testind,]
+#     testpred$Genotype %in% unique(test.data$Genotype)
+#     testpred = testpred[order(testpred$Genotype),]
+# 
+#     obs_test =  test.data1 %>% group_by(Genotype) %>%
+#       summarise_at(.vars = "drgBLUP", .funs = mean)
+#     obs_test= obs_test[order(obs_test$Genotype),]
+#     r = cbind( Trait = Trait, predictability = round(cor(testpred[,"drgBLUP"],obs_test[,"drgBLUP"], use = "pairwise.complete.obs"),3))
+#     colnames(r)[2] <- c("predictability")
+#     Acc_pred = rbind(Acc_pred,r)
+# 
+# 
+#   }
+# }
+# #}
+# Acc_pred$predictability= as.numeric(Acc_pred$predictability)
+# ggplot(Acc_pred, mapping = aes(x = Trait, y = predictability, fill = Trait)) +
+#   geom_boxplot() + theme_bw()
 
 
 ```
@@ -1508,8 +1640,8 @@ filtered_value= rbind(filtered_value, Bx_2)
 vcomp
 write.csv(x=vcomp,file = "~/Documents/ChinedoziRepo/GarriQuality/output/H2_garri_full_model.csv")
 ```
-```{r}
-#Predict the BLUEs for garri
+```{r, Predict the BLUEs for garri to to make a biplot for the physicochemical traits of garri}
+
 library(emmeans)
 traitnames<- (c("SI","SP", "WAC", "BD", "AMY","CF", "STC", "SC"))
 BLUEMean = tibble()
@@ -1521,58 +1653,80 @@ eval(parse(text = paste("model1= lmer(",traits,"~ (1|Year)  + (1|Location) + (1|
 em2 = cbind(Trait = traits,em1[,1:2])
 BLUEMean = rbind(BLUEMean, em2)
 }
+# head(BLUEMean)
+# library(reshape2)
+# BLUEMeanWide = dcast(data = BLUEMean, formula = Genotype ~ Trait, fun.aggregate = mean, value.var = "emmean")
+# head(BLUEMeanWide)
+# BLUEMeanWide = as.data.frame(BLUEMeanWide)
+# rownames(BLUEMeanWide) <- BLUEMeanWide$Genotype
+# pc1 = PCA(X = BLUEMeanWide[,-1], scale.unit = T  )
+# factoextra::fviz_pca_ind(pc1,  labelsize = 1)
+# fviz_pca_biplot(X = pc1, labelsize =1,arrowsize = 0.2, pointsize = 0.5, col.var = "red")
+
 head(BLUEMean)
-library(reshape2)
-BLUEMeanWide = dcast(data = BLUEMean, formula = Genotype ~ Trait, fun.aggregate = mean, value.var = "emmean")
-head(BLUEMeanWide)
-BLUEMeanWide = as.data.frame(BLUEMeanWide)
-rownames(BLUEMeanWide) <- BLUEMeanWide$Genotype
-pc1 = PCA(X = BLUEMeanWide[,-1], scale.unit = T  )
-factoextra::fviz_pca_ind(pc1,  labelsize = 1)
+ library(reshape2)
+ BLUEMeanWide = dcast(data = BLUEMean, formula = Genotype ~ Trait, fun.aggregate = mean, value.var = "emmean")
+ head(BLUEMeanWide)
+ BLUEMeanWide = as.data.frame(BLUEMeanWide)
+ rownames(BLUEMeanWide) <- BLUEMeanWide$Genotype
+ #gsub(pattern = )
+ gc = c()
+ for(i in 1:192){
+ idx = paste(c("G",i), collapse = "")
+ gc = c(gc,idx)
+ }
+ BLUEMeanWide$Gcode = gc
+ rownames(BLUEMeanWide) <- BLUEMeanWide$Gcode
+ pc_G = PCA(X = BLUEMeanWide[,-c(1,10)], scale.unit = T  )
+ factoextra::fviz_pca_ind( pc_G,cex=0.8,  labelsize = 1)
 
+fviz_pca_biplot(X = pc_G,labelsize= 2, arrowsize = 0.3,
+                 pointsize = 0.1, col.var = "red") +
+   theme(text = element_text(size = 12))
 
-fviz_pca_biplot(X = pc1, labelsize =1,arrowsize = 0.2, pointsize = 0.5, col.var = "red")
+ write.csv(x = BLUEMeanWide[,c(1,10)], file = "/Users/ca384/Documents/ChinedoziRepo/GarriQuality/output/Garri_genotype_code.csv",row.names = F)
+
 
 ```
 
 ```{r, genetic correlation}
-install.packages("biotools")
-library(biotools)
-
-garri_mano = manova(cbind(SI,SP, WAC, BD, AMY,CF, STC, SC)~Year + Location + Year:Location +
-      Genotype + Genotype:Year + Genotype:Location,
-  data=Data7)
-garri_gencov <- gencovtest(obj = garri_mano,geneticFactor = "Genotype")
-diag(garri_gencov$gcov)
-garri_gencov$gcor
-#####
-# sommer
-
-mrc1 = mmer(fixed = cbind(WAC, SC) ~ 1, 
-     random = ~ Year:Location +
-       Genotype + Genotype:Year + Genotype:Location, 
-     rcov = ~units, data = Data7)
-ss = summary(mrc1)
-ss$varcomp
-2.374/(sqrt(69.8*0.00231))
-for(i in traitnames){
-  for(j in traitnames){
-    
-mod1= lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
-       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
-  data=Data7)
-mod2= lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
-       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
-  data=Data7)
-modlxy = lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
-       (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
-  data=Data7)
-
- }
-  }
-
-All_dmc1 = ALL_DMC %>% group_by(Location, Year, Genotype) %>%
- 
+# install.packages("biotools")
+# library(biotools)
+# 
+# garri_mano = manova(cbind(SI,SP, WAC, BD, AMY,CF, STC, SC)~Year + Location + Year:Location +
+#       Genotype + Genotype:Year + Genotype:Location,
+#   data=Data7)
+# garri_gencov <- gencovtest(obj = garri_mano,geneticFactor = "Genotype")
+# diag(garri_gencov$gcov)
+# garri_gencov$gcor
+# #####
+# # sommer
+# 
+# mrc1 = mmer(fixed = cbind(WAC, SC) ~ 1, 
+#      random = ~ Year:Location +
+#        Genotype + Genotype:Year + Genotype:Location, 
+#      rcov = ~units, data = Data7)
+# ss = summary(mrc1)
+# ss$varcomp
+# 2.374/(sqrt(69.8*0.00231))
+# for(i in traitnames){
+#   for(j in traitnames){
+#     
+# mod1= lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
+#        (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+#   data=Data7)
+# mod2= lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
+#        (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+#   data=Data7)
+# modlxy = lmer(WAC~ (1|Year) + (1|Location) + (1|Year:Location) +
+#        (1|Genotype) + (1|Genotype:Year) + (1|Genotype:Location),
+#   data=Data7)
+# 
+#  }
+#   }
+# 
+# #All_dmc1 = ALL_DMC %>% group_by(Location, Year, Genotype) %>%
+#  
 
 ```
 
